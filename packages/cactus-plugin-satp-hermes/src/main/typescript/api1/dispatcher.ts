@@ -1,10 +1,11 @@
 import {
-  type Logger,
   Checks,
   type LogLevelDesc,
-  LoggerProvider,
   type JsObjectSigner,
 } from "@hyperledger/cactus-common";
+
+import { SatpLoggerProvider as LoggerProvider } from "../core/satp-logger-provider";
+import { Satp_Logger as Logger } from "../core/satp-logger";
 
 import { type IWebServiceEndpoint } from "@hyperledger/cactus-core-api";
 
@@ -107,10 +108,13 @@ export class BLODispatcher {
 
     this.level = this.options.logLevel || "INFO";
     this.label = this.className;
-    this.logger = LoggerProvider.getOrCreate({
-      level: this.level,
-      label: this.label,
-    });
+    this.logger = LoggerProvider.getOrCreate(
+      {
+        level: this.level,
+        label: this.label,
+      },
+      this.options.monitorService,
+    );
     this.instanceId = options.instanceId;
     this.logger.info(`Instantiated ${this.className} OK`);
     this.orchestrator = options.orchestrator;

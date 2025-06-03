@@ -8,11 +8,11 @@ import {
 import { stringify as safeStableStringify } from "safe-stable-stringify";
 import {
   ISignerKeyPair,
-  type Logger,
-  LoggerProvider,
   type LogLevelDesc,
   Secp256k1Keys,
 } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../core/satp-logger-provider";
+import { Satp_Logger as Logger } from "../../../core/satp-logger";
 import { PluginBungeeHermes } from "@hyperledger/cactus-plugin-bungee-hermes";
 import { StrategyFabric } from "@hyperledger/cactus-plugin-bungee-hermes/dist/lib/main/typescript/strategy/strategy-fabric";
 import { OracleAbstract, type OracleAbstractOptions } from "../oracle-abstract";
@@ -33,6 +33,7 @@ import {
   ChannelNameError,
 } from "../../common/errors";
 import { v4 as uuidv4 } from "uuid";
+import { MonitorService } from "../../../services/monitoring/monitor";
 
 interface ContractEvent {
   chaincodeId: string;
@@ -60,6 +61,7 @@ export interface IOracleFabricOptions extends OracleAbstractOptions {
   leafId?: string;
   keyPair?: ISignerKeyPair;
   claimFormats?: ClaimFormat[];
+  monitorService: MonitorService;
 }
 
 export class OracleFabric extends OracleAbstract {
@@ -72,6 +74,7 @@ export class OracleFabric extends OracleAbstract {
   protected readonly connector: PluginLedgerConnectorFabric;
   protected readonly bungee?: PluginBungeeHermes;
   protected readonly claimFormats: ClaimFormat[];
+  protected readonly monitorService: MonitorService;
 
   private readonly signingCredential: FabricSigningCredential;
   private readonly channelName: string;
@@ -80,7 +83,11 @@ export class OracleFabric extends OracleAbstract {
     super();
     const label = OracleFabric.CLASS_NAME;
     this.logLevel = this.options.logLevel || "INFO";
-    this.log = LoggerProvider.getOrCreate({ label, level: this.logLevel });
+    this.monitorService = this.options.monitorService;
+    this.log = LoggerProvider.getOrCreate(
+      { label, level: this.logLevel },
+      this.monitorService,
+    );
 
     this.log.debug(
       `${OracleFabric.CLASS_NAME}#constructor options: ${safeStableStringify(options)}`,
@@ -217,33 +224,34 @@ export class OracleFabric extends OracleAbstract {
       `${fnTag}: Subscribing to event with args: ${safeStableStringify(args)}`,
     );
 
-    const { removeListener } = await this.connector.createFabricListener({
-      channelName: this.channelName,
-      contractName: args.contractName,
-      signingCredential: this.signingCredential,
-    },
-    async (event: ContractEvent) => {
-      this.log.debug(
-        `${fnTag}: Received event log: ${safeStableStringify(event)}`,
-      );
+    const { removeListener } = await this.connector.createFabricListener(
+      {
+        channelName: this.channelName,
+        contractName: args.contractName,
+        signingCredential: this.signingCredential,
+      },
+      async (event: ContractEvent) => {
+        this.log.debug(
+          `${fnTag}: Received event log: ${safeStableStringify(event)}`,
+        );
 
-      if (event) {
-        if (event.eventName === args.eventSignature && event.payload) {
-          const payload = event.payload.toString("utf-8");
-          const payloadJson = JSON.parse(payload);
+        if (event) {
+          if (event.eventName === args.eventSignature && event.payload) {
+            const payload = event.payload.toString("utf-8");
+            const payloadJson = JSON.parse(payload);
 
-          const output_params = this.extractNamedParams(payloadJson, filter);
+            const output_params = this.extractNamedParams(payloadJson, filter);
 
-          callback(output_params);
-
-        } else {
-          this.log.debug(
-            `${fnTag}: Event name ${event.eventName} does not match expected ${args.eventSignature}. Will not process.`,
-          );
-          return;
+            callback(output_params);
+          } else {
+            this.log.debug(
+              `${fnTag}: Event name ${event.eventName} does not match expected ${args.eventSignature}. Will not process.`,
+            );
+            return;
+          }
         }
-      }
-    });
+      },
+    );
 
     return {
       unsubscribe: () => removeListener(),

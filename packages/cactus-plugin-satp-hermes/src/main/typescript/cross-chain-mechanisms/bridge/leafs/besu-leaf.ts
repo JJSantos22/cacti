@@ -14,11 +14,9 @@ import { stringify as safeStableStringify } from "safe-stable-stringify";
 import { PluginBungeeHermes } from "@hyperledger/cactus-plugin-bungee-hermes";
 import { StrategyBesu } from "@hyperledger/cactus-plugin-bungee-hermes/dist/lib/main/typescript/strategy/strategy-besu";
 import { EvmAsset } from "../ontology/assets/evm-asset";
-import {
-  Logger,
-  LoggerProvider,
-  LogLevelDesc,
-} from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../core/satp-logger-provider";
+import { Satp_Logger as Logger } from "../../../core/satp-logger";
 import {
   ClaimFormat,
   TokenType,
@@ -55,6 +53,7 @@ import { NetworkId } from "../../../public-api";
 import { getEnumKeyByValue } from "../../../services/utils";
 import { getUint8Key } from "./leafs-utils";
 import { isWeb3SigningCredentialNone } from "../../common/utils";
+import { MonitorService } from "../../../services/monitoring/monitor";
 
 export interface IBesuLeafNeworkOptions extends INetworkOptions {
   signingCredential: Web3SigningCredential;
@@ -69,7 +68,9 @@ export interface IBesuLeafNeworkOptions extends INetworkOptions {
 
 export interface IBesuLeafOptions
   extends IBridgeLeafOptions,
-    IBesuLeafNeworkOptions {}
+    IBesuLeafNeworkOptions {
+  monitorService: MonitorService;
+}
 
 /**
  * Represents the response from an Besu transaction.
@@ -158,6 +159,8 @@ export class BesuLeaf
 
   private wrapperContractName: string | undefined;
 
+  private monitorService: MonitorService;
+
   /**
    * Constructs a new instance of the `BesuLeaf` class.
    *
@@ -170,7 +173,11 @@ export class BesuLeaf
     super();
     const label = BesuLeaf.CLASS_NAME;
     this.logLevel = this.options.logLevel || "INFO";
-    this.log = LoggerProvider.getOrCreate({ label, level: this.logLevel });
+    this.monitorService = this.options.monitorService;
+    this.log = LoggerProvider.getOrCreate(
+      { label, level: this.logLevel },
+      this.monitorService,
+    );
 
     this.log.debug(
       `${BesuLeaf.CLASS_NAME}#constructor options: ${safeStableStringify(options)}`,

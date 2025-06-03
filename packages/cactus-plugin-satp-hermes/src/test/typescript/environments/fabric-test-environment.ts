@@ -1,8 +1,6 @@
-import {
-  Logger,
-  LoggerProvider,
-  LogLevelDesc,
-} from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../main/typescript/core/satp-logger-provider";
+import { Satp_Logger as Logger } from "../../../main/typescript/core/satp-logger";
 import {
   AssetTokenTypeEnum,
   Configuration,
@@ -40,11 +38,13 @@ import ExampleOntology from "../../ontologies/ontology-satp-erc20-interact-fabri
 import { OntologyManager } from "../../../main/typescript/cross-chain-mechanisms/bridge/ontology/ontology-manager";
 import { INetworkOptions } from "../../../main/typescript/cross-chain-mechanisms/bridge/bridge-types";
 import Docker from "dockerode";
+import { MonitorService } from "../../../main/typescript/services/monitoring/monitor";
 // Test environment for Fabric ledger operations
 
 export interface IFabricTestEnvironment {
   contractName: string;
   logLevel: LogLevelDesc;
+  monitorService: MonitorService;
   claimFormat?: ClaimFormat;
   network?: string;
 }
@@ -80,6 +80,7 @@ export class FabricTestEnvironment {
   private dockerNetwork: string = "fabric";
 
   private readonly log: Logger;
+  private monitorService: MonitorService;
 
   private bridgeMSPID?: string;
   public bridgeIdentity?: X509Identity;
@@ -88,6 +89,7 @@ export class FabricTestEnvironment {
   private constructor(
     satpContractName: string,
     logLevel: LogLevelDesc,
+    monitorService: MonitorService,
     network?: string,
     claimFormat?: ClaimFormat,
   ) {
@@ -100,7 +102,11 @@ export class FabricTestEnvironment {
 
     const level = logLevel || "INFO";
     const label = "FabricTestEnvironment";
-    this.log = LoggerProvider.getOrCreate({ level, label });
+    this.monitorService = monitorService;
+    this.log = LoggerProvider.getOrCreate(
+      { level, label },
+      this.monitorService,
+    );
   }
 
   // Initializes the Fabric ledger, accounts, and connector for testing
@@ -258,10 +264,12 @@ export class FabricTestEnvironment {
   public static async setupTestEnvironment(
     config: IFabricTestEnvironment,
   ): Promise<FabricTestEnvironment> {
-    const { contractName, logLevel, claimFormat, network } = config;
+    const { contractName, logLevel, monitorService, claimFormat, network } =
+      config;
     const instance = new FabricTestEnvironment(
       contractName,
       logLevel,
+      monitorService,
       network,
       claimFormat,
     );
@@ -387,6 +395,7 @@ export class FabricTestEnvironment {
       },
       claimFormats: [this.claimFormat],
       logLevel: logLevel,
+      monitorService: this.monitorService,
     };
   }
 
@@ -619,7 +628,6 @@ export class FabricTestEnvironment {
 
     this.clientId = responseClientId.functionOutput.toString();
   }
-
 
   public async deployAndSetupOracleContracts() {
     this.satpContractName = "oracle-bl-contract";

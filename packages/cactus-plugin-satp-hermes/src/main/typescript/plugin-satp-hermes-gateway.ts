@@ -1,14 +1,15 @@
 import {
   Secp256k1Keys,
-  type Logger,
   Checks,
-  LoggerProvider,
   type ILoggerOptions,
   JsObjectSigner,
   type IJsObjectSignerOptions,
   LogLevelDesc,
   Servers,
 } from "@hyperledger/cactus-common";
+
+import { Satp_Logger as Logger } from "./core/satp-logger";
+import { SatpLoggerProvider as LoggerProvider } from "./core/satp-logger-provider";
 import { v4 as uuidv4 } from "uuid";
 
 import { ValidatorOptions } from "class-validator";
@@ -151,12 +152,12 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
       level: level,
       label: this.className,
     };
-    this.logger = LoggerProvider.getOrCreate(logOptions);
-    this.logger.info("Initializing Gateway Coordinator");
     this.monitorService = MonitorService.createOrGetMonitorService({
       logLevel: this.config.logLevel,
     });
     void this.initializeMonitorService();
+    this.logger = LoggerProvider.getOrCreate(logOptions, this.monitorService);
+    this.logger.info("Initializing Gateway Coordinator");
 
     if (this.config.localRepository) {
       this.localRepository = new LocalLogRepository(
@@ -236,8 +237,10 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
       orquestrator: this.gatewayOrchestrator,
       ontologyOptions: {
         ontologiesPath: this.config.ontologyPath,
+        monitorService: this.monitorService,
       },
       logLevel: this.config.logLevel,
+      monitorService: this.monitorService,
     };
 
     this.SATPCCManager = new SATPCrossChainManager(SATPCCManagerOptions);

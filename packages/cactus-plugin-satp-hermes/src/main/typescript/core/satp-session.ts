@@ -1,12 +1,10 @@
 import { v4 as uuidv4 } from "uuid";
 import { stringify as safeStableStringify } from "safe-stable-stringify";
 
-import {
-  Checks,
-  LogLevelDesc,
-  Logger,
-  LoggerProvider,
-} from "@hyperledger/cactus-common";
+import { Checks, LogLevelDesc } from "@hyperledger/cactus-common";
+
+import { SatpLoggerProvider as LoggerProvider } from "./satp-logger-provider";
+import { Satp_Logger as Logger } from "./satp-logger";
 
 import {
   Type,
@@ -84,8 +82,11 @@ export class SATPSession {
 
     const level = ops.logLevel || "DEBUG";
     const label = this.className;
-    this.logger = LoggerProvider.getOrCreate({ level, label });
     this.monitorService = ops.monitorService;
+    this.logger = LoggerProvider.getOrCreate(
+      { level, label },
+      this.monitorService,
+    );
 
     if (!ops.server && !ops.client) {
       throw new Error(`${SATPSession.CLASS_NAME}#constructor(), at least one of server or client must be true

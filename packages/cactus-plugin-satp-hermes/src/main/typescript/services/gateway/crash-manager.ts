@@ -1,10 +1,10 @@
 import {
-  type Logger,
-  LoggerProvider,
   Checks,
   type LogLevelDesc,
   type JsObjectSigner,
 } from "@hyperledger/cactus-common";
+import { Satp_Logger as Logger } from "../../core/satp-logger";
+import { SatpLoggerProvider as LoggerProvider } from "../../core/satp-logger-provider";
 import {
   Type,
   type SessionData,
@@ -75,7 +75,11 @@ export class CrashManager {
 
     const level = this.options.logLevel;
     const label = this.className;
-    this.log = LoggerProvider.getOrCreate({ level, label });
+    this.monitorService = options.monitorService;
+    this.log = LoggerProvider.getOrCreate(
+      { level, label },
+      this.monitorService,
+    );
     this.log.info(`Instantiated ${this.className} OK`);
     this.instanceId = options.instanceId;
     this.sessions = new Map<string, SATPSession>();
@@ -84,7 +88,6 @@ export class CrashManager {
     this.signer = options.signer;
     this.orchestrator = options.orchestrator;
     this.ccManager = options.ccManager;
-    this.monitorService = options.monitorService;
     this.loadPubKeys(this.orchestrator.getCounterPartyGateways());
 
     this.factory = new RollbackStrategyFactory(

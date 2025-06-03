@@ -25,5 +25,4 @@ services:
       - "4317:4317" # OpenTelemetry gRPC endpoint
       - "4318:4318" # OpenTelemetry HTTP endpoint
       - "9090:9090"  # Prometheus
-      - "8080:8080"  # Mimir
     restart: unless-stopped

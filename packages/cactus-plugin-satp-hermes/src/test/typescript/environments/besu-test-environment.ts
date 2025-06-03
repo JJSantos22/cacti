@@ -1,8 +1,6 @@
-import {
-  Logger,
-  LoggerProvider,
-  LogLevelDesc,
-} from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../main/typescript/core/satp-logger-provider";
+import { Satp_Logger as Logger } from "../../../main/typescript/core/satp-logger";
 import { BesuTestLedger } from "@hyperledger/cactus-test-tooling";
 import {
   EthContractInvocationType as BesuContractInvocationType,
@@ -30,9 +28,11 @@ import { OntologyManager } from "../../../main/typescript/cross-chain-mechanisms
 import ExampleOntology from "../../ontologies/ontology-satp-erc20-interact-besu.json";
 import { INetworkOptions } from "../../../main/typescript/cross-chain-mechanisms/bridge/bridge-types";
 import Docker from "dockerode";
+import { MonitorService } from "../../../main/typescript/services/monitoring/monitor";
 export interface IBesuTestEnvironment {
   contractName: string;
   logLevel: LogLevelDesc;
+  monitorService: MonitorService;
   network?: string;
 }
 export class BesuTestEnvironment {
@@ -62,11 +62,14 @@ export class BesuTestEnvironment {
   private dockerContainerIP?: string;
   private dockerNetwork: string = "besu";
 
+  private monitorService: MonitorService;
+
   private readonly log: Logger;
 
   private constructor(
     erc20TokenContract: string,
     logLevel: LogLevelDesc,
+    monitorService: MonitorService,
     network?: string,
   ) {
     if (network) {
@@ -77,7 +80,11 @@ export class BesuTestEnvironment {
 
     const level = logLevel || "INFO";
     const label = "BesuTestEnvironment";
-    this.log = LoggerProvider.getOrCreate({ level, label });
+    this.monitorService = monitorService;
+    this.log = LoggerProvider.getOrCreate(
+      { level, label },
+      this.monitorService,
+    );
   }
 
   // Initializes the Besu ledger, accounts, and connector for testing
@@ -192,6 +199,7 @@ export class BesuTestEnvironment {
     const instance = new BesuTestEnvironment(
       config.contractName,
       config.logLevel,
+      config.monitorService,
       config.network,
     );
     await instance.init(config.logLevel);
@@ -251,6 +259,7 @@ export class BesuTestEnvironment {
       },
       claimFormats: this.besuConfig.claimFormats,
       logLevel: logLevel,
+      monitorService: this.monitorService,
     };
   }
 

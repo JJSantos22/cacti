@@ -11,7 +11,8 @@ import {
   pruneDockerAllIfGithubAction,
   Containers,
 } from "@hyperledger/cactus-test-tooling";
-import { LoggerProvider, LogLevelDesc } from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../../main/typescript/core/satp-logger-provider";
 import { Knex, knex } from "knex";
 import {
   SATPGatewayConfig,
@@ -41,14 +42,20 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import { PluginRegistry } from "@hyperledger/cactus-core";
 import axios from "axios";
+import { MonitorService } from "../../../../main/typescript/services/monitoring/monitor";
 
 const PROMETHEUS_URL = "http://localhost:9090";
 
+const monitorService = MonitorService.createOrGetMonitorService({});
+
 const logLevel: LogLevelDesc = "DEBUG";
-const log = LoggerProvider.getOrCreate({
-  level: logLevel,
-  label: "SATP - Hermes",
-});
+const log = LoggerProvider.getOrCreate(
+  {
+    level: logLevel,
+    label: "SATP - Hermes",
+  },
+  monitorService,
+);
 
 let knexSourceRemoteInstance: Knex;
 let ethereumEnv: EthereumTestEnvironment;
@@ -131,6 +138,7 @@ beforeAll(async () => {
   ethereumEnv = await EthereumTestEnvironment.setupTestEnvironment({
     contractName: erc20TokenContract,
     logLevel,
+    monitorService: monitorService,
   });
   log.info("Ethereum Ledger started successfully");
   await ethereumEnv.deployAndSetupContracts(ClaimFormat.BUNGEE);
@@ -138,11 +146,12 @@ beforeAll(async () => {
   besuEnv = await BesuTestEnvironment.setupTestEnvironment({
     contractName: erc20TokenContract,
     logLevel,
+    monitorService: monitorService,
   });
   console.info("Besu Ledger started successfully");
   await besuEnv.deployAndSetupContracts(ClaimFormat.BUNGEE);
   // Start monitoring system
-  startDockerComposeService("otel-lgtm");
+  //startDockerComposeService("otel-lgtm");
 });
 
 afterAll(async () => {
@@ -164,7 +173,7 @@ afterAll(async () => {
       await Containers.logDiagnostics({ logLevel });
       fail("Pruning didn't throw OK");
     });
-  stopDockerComposeService("otel-lgtm");
+  //stopDockerComposeService("otel-lgtm");
 });
 
 describe("otel-lgtm captures metrics when a transaction occurs", () => {
@@ -334,3 +343,4 @@ describe("otel-lgtm captures metrics when a transaction occurs", () => {
     expect(result.status).toBe("success");
   });
 });
+describe("should capture the transaction traces using mimir", () => {});

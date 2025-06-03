@@ -2,9 +2,9 @@ import {
   Checks,
   JsObjectSigner,
   LogLevelDesc,
-  Logger,
-  LoggerProvider,
 } from "@hyperledger/cactus-common";
+import { Satp_Logger as Logger } from "../../core/satp-logger";
+import { SatpLoggerProvider as LoggerProvider } from "../../core/satp-logger-provider";
 import { stringify as safeStableStringify } from "safe-stable-stringify";
 
 import { Stage0SATPHandler } from "../../core/stage-handlers/stage0-handler";
@@ -140,7 +140,11 @@ export class SATPManager {
 
     const level = this.options.logLevel || "DEBUG";
     const label = this.className;
-    this.logger = LoggerProvider.getOrCreate({ level, label });
+    this.monitorService = options.monitorService;
+    this.logger = LoggerProvider.getOrCreate(
+      { level, label },
+      this.monitorService,
+    );
     this.instanceId = options.instanceId;
     this.logger.info(`Instantiated ${this.className} OK`);
     this.status = HealthCheckResponseStatusEnum.Available;
@@ -153,7 +157,6 @@ export class SATPManager {
     this.localRepository = options.localRepository;
     this.remoteRepository = options.remoteRepository;
     this.claimFormat = options.claimFormat || ClaimFormat.DEFAULT;
-    this.monitorService = options.monitorService;
 
     this.sessions = options.sessions || new Map<string, SATPSession>();
     const handlersClasses = [
@@ -169,6 +172,7 @@ export class SATPManager {
       signer: this.signer,
       pubKey: this.pubKey,
       logLevel: level,
+      monitorService: this.monitorService,
     };
 
     this.dbLogger = new SATPLogger(satpLoggerConfig);
@@ -439,6 +443,7 @@ export class SATPManager {
             level: level,
             label: `SATPHandler-Stage${serviceIndex}`,
           },
+          monitorService: this.monitorService,
         };
         handlersOptions.push(handlerOptions);
       }

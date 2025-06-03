@@ -6,9 +6,12 @@ import { LedgerType } from "@hyperledger/cactus-core-api";
 import { OntologyNotFoundError } from "../../../../main/typescript/cross-chain-mechanisms/bridge/ontology/ontology-errors";
 import * as fs from "fs";
 import * as path from "path";
+import { MonitorService } from "../../../../main/typescript/services/monitoring/monitor";
 
 jest.mock("fs");
 jest.mock("path");
+
+const monitorService = MonitorService.createOrGetMonitorService({});
 
 describe("OntologyManager", () => {
   const mockOntologiesPath = "./ontologies";
@@ -141,6 +144,7 @@ describe("OntologyManager", () => {
   test("should load ontologies from the specified path", () => {
     const options: IOntologyManagerOptions = {
       ontologiesPath: mockOntologiesPath,
+      monitorService: monitorService,
     };
     const ontologyManager = new OntologyManager(options);
 
@@ -164,6 +168,7 @@ describe("OntologyManager", () => {
   test("should throw OntologyNotFoundError if ontology is not found", () => {
     const options: IOntologyManagerOptions = {
       ontologiesPath: mockOntologiesPath,
+      monitorService: monitorService,
     };
     const ontologyManager = new OntologyManager(options);
 
@@ -175,6 +180,7 @@ describe("OntologyManager", () => {
   test("should throw LedgerNotSupported if ledger type is not found", () => {
     const options: IOntologyManagerOptions = {
       ontologiesPath: mockOntologiesPath,
+      monitorService: monitorService,
     };
     const ontologyManager = new OntologyManager(options);
 
@@ -186,6 +192,7 @@ describe("OntologyManager", () => {
   test("should retrieve ontology interactions for Fabric2 ledger type", () => {
     const options: IOntologyManagerOptions = {
       ontologiesPath: mockOntologiesPath,
+      monitorService: monitorService,
     };
     const ontologyManager = new OntologyManager(options);
 

@@ -152,6 +152,7 @@ const sessionIDs: string[] = [];
 beforeAll(async () => {
   bridgeManager = new BridgeManager({
     logLevel: logLevel,
+    monitorService: monitorService,
   });
 
   jest.spyOn(bridgeManager, "getSATPExecutionLayer").mockImplementation(() => {
@@ -184,6 +185,7 @@ beforeAll(async () => {
     remoteRepository,
     signer,
     pubKey: Buffer.from(keyPairs.publicKey).toString("hex"),
+    monitorService: monitorService,
   });
 
   persistLogEntrySpy = jest.spyOn(dbLogger, "persistLogEntry");

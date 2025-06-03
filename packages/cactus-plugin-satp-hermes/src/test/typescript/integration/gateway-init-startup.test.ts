@@ -3,7 +3,8 @@ import {
   Containers,
   pruneDockerAllIfGithubAction,
 } from "@hyperledger/cactus-test-tooling";
-import { type LogLevelDesc, LoggerProvider } from "@hyperledger/cactus-common";
+import { type LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../main/typescript/core/satp-logger-provider";
 import { ApiServer } from "@hyperledger/cactus-cmd-api-server";
 import { ApiClient } from "@hyperledger/cactus-api-client";
 
@@ -32,12 +33,17 @@ import {
   knexClientConnection,
   knexSourceRemoteConnection,
 } from "../knex.config";
+import { MonitorService } from "../../../main/typescript/services/monitoring/monitor";
 
 const logLevel: LogLevelDesc = "DEBUG";
-const logger = LoggerProvider.getOrCreate({
-  level: logLevel,
-  label: "satp-gateway-orchestrator-init-test",
-});
+const monitorService = MonitorService.createOrGetMonitorService({});
+const logger = LoggerProvider.getOrCreate(
+  {
+    level: logLevel,
+    label: "satp-gateway-orchestrator-init-test",
+  },
+  monitorService,
+);
 const factoryOptions: IPluginFactoryOptions = {
   pluginImportType: PluginImportType.Local,
 };

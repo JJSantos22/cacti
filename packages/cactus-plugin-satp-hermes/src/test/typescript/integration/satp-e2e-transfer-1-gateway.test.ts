@@ -1,5 +1,6 @@
 import "jest-extended";
-import { LogLevelDesc, LoggerProvider } from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../main/typescript/core/satp-logger-provider";
 import {
   pruneDockerAllIfGithubAction,
   Containers,
@@ -35,12 +36,17 @@ import { Knex, knex } from "knex";
 import { PluginRegistry } from "@hyperledger/cactus-core";
 import { v4 as uuidv4 } from "uuid";
 import path from "path";
+import { MonitorService } from "../../../main/typescript/services/monitoring/monitor";
 
 const logLevel: LogLevelDesc = "DEBUG";
-const log = LoggerProvider.getOrCreate({
-  level: logLevel,
-  label: "SATP - Hermes",
-});
+const monitorService = MonitorService.createOrGetMonitorService({});
+const log = LoggerProvider.getOrCreate(
+  {
+    level: logLevel,
+    label: "SATP - Hermes",
+  },
+  monitorService,
+);
 
 let knexSourceRemoteInstance: Knex;
 let fabricEnv: FabricTestEnvironment;
@@ -85,6 +91,7 @@ beforeAll(async () => {
       contractName: satpContractName,
       logLevel,
       claimFormat: ClaimFormat.BUNGEE,
+      monitorService: monitorService,
     });
     log.info("Fabric Ledger started successfully");
 
@@ -96,6 +103,7 @@ beforeAll(async () => {
     besuEnv = await BesuTestEnvironment.setupTestEnvironment({
       contractName: erc20TokenContract,
       logLevel,
+      monitorService: monitorService,
     });
     log.info("Besu Ledger started successfully");
 
@@ -106,6 +114,7 @@ beforeAll(async () => {
     ethereumEnv = await EthereumTestEnvironment.setupTestEnvironment({
       contractName: erc20TokenContract,
       logLevel,
+      monitorService: monitorService,
     });
     log.info("Ethereum Ledger started successfully");
     await ethereumEnv.deployAndSetupContracts(ClaimFormat.BUNGEE);

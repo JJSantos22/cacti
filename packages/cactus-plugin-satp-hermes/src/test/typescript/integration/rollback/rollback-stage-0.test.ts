@@ -37,7 +37,8 @@ import {
   knexTargetRemoteConnection,
   knexServerConnection,
 } from "../../knex.config";
-import { LogLevelDesc, LoggerProvider } from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../../main/typescript/core/satp-logger-provider";
 import { Knex, knex } from "knex";
 import { create } from "@bufbuild/protobuf";
 import { stringify as safeStableStringify } from "safe-stable-stringify";
@@ -77,10 +78,13 @@ const monitorService = MonitorService.createOrGetMonitorService({});
 const gateway1KeyPair = Secp256k1Keys.generateKeyPairsBuffer();
 const gateway2KeyPair = Secp256k1Keys.generateKeyPairsBuffer();
 const logLevel: LogLevelDesc = "DEBUG";
-const log = LoggerProvider.getOrCreate({
-  level: logLevel,
-  label: "Rollback-stage-0",
-});
+const log = LoggerProvider.getOrCreate(
+  {
+    level: logLevel,
+    label: "Rollback-stage-0",
+  },
+  monitorService,
+);
 
 // mock stage-0 rollback
 const createMockSession = (
@@ -170,6 +174,7 @@ beforeAll(async () => {
     ontologyManager = new OntologyManager({
       logLevel,
       ontologiesPath: ontologiesPath,
+      monitorService: monitorService,
     });
 
     const satpContractName = "satp-contract";
@@ -177,6 +182,7 @@ beforeAll(async () => {
       contractName: satpContractName,
       logLevel,
       claimFormat: ClaimFormat.DEFAULT,
+      monitorService: monitorService,
     });
     log.info("Fabric Ledger started successfully");
 
@@ -189,6 +195,7 @@ beforeAll(async () => {
     besuEnv = await BesuTestEnvironment.setupTestEnvironment({
       contractName: erc20TokenContract,
       logLevel,
+      monitorService: monitorService,
     });
     log.info("Besu Ledger started successfully");
 

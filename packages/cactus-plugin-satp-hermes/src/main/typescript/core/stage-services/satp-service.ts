@@ -1,9 +1,9 @@
 import {
   type JsObjectSigner,
-  type Logger,
-  LoggerProvider,
   type ILoggerOptions,
 } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../satp-logger-provider";
+import { Satp_Logger as Logger } from "../satp-logger";
 import type { SatpStage0Service } from "../../generated/proto/cacti/satp/v02/service/stage_0_pb";
 import type { SatpStage1Service } from "../../generated/proto/cacti/satp/v02/service/stage_1_pb";
 import type { SatpStage2Service } from "../../generated/proto/cacti/satp/v02/service/stage_2_pb";
@@ -66,7 +66,11 @@ export abstract class SATPService {
   public monitorService: MonitorService;
 
   constructor(ops: ISATPServiceOptions) {
-    this.logger = LoggerProvider.getOrCreate(ops.loggerOptions);
+    this.monitorService = ops.monitorService;
+    this.logger = LoggerProvider.getOrCreate(
+      ops.loggerOptions,
+      this.monitorService,
+    );
     this.serviceName = ops.serviceName;
     this.serviceType = ops.serviceType;
     this.stage = ops.stage;
@@ -76,7 +80,6 @@ export abstract class SATPService {
     }
     this.dbLogger = ops.dbLogger;
     this.logger.trace(`Signer logger level: ${this.signer.options.logLevel}`);
-    this.monitorService = ops.monitorService;
   }
 
   public getServiceIdentifier(): string {

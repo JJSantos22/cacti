@@ -1,4 +1,5 @@
-import { LoggerProvider, LogLevelDesc } from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../../main/typescript/core/satp-logger-provider";
 import {
   pruneDockerAllIfGithubAction,
   Containers,
@@ -12,16 +13,22 @@ import path from "path";
 import { OntologyManager } from "../../../../main/typescript/cross-chain-mechanisms/bridge/ontology/ontology-manager";
 import { EthereumTestEnvironment } from "../../test-utils";
 import { EvmFungibleAsset } from "../../../../main/typescript/cross-chain-mechanisms/bridge/ontology/assets/evm-asset";
+import { MonitorService } from "../../../../main/typescript/services/monitoring/monitor";
 
 let ontologyManager: OntologyManager;
 
 let asset: EvmFungibleAsset;
 
+const monitorService = MonitorService.createOrGetMonitorService({});
+
 const logLevel: LogLevelDesc = "DEBUG";
-const log = LoggerProvider.getOrCreate({
-  level: logLevel,
-  label: "SATP - Hermes",
-});
+const log = LoggerProvider.getOrCreate(
+  {
+    level: logLevel,
+    label: "SATP - Hermes",
+  },
+  monitorService,
+);
 
 let ethereumLeaf: EthereumLeaf;
 let ethereumEnv: EthereumTestEnvironment;
@@ -43,11 +50,13 @@ beforeAll(async () => {
     ontologyManager = new OntologyManager({
       logLevel,
       ontologiesPath: ontologiesPath,
+      monitorService,
     });
 
     ethereumEnv = await EthereumTestEnvironment.setupTestEnvironment({
       contractName: erc20TokenContract,
       logLevel,
+      monitorService,
     });
     log.info("Ethereum Ledger started successfully");
 

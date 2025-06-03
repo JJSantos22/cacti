@@ -22,9 +22,9 @@ import {
   IJsObjectSignerOptions,
   JsObjectSigner,
   type LogLevelDesc,
-  LoggerProvider,
   Secp256k1Keys,
 } from "@hyperledger/cactus-common";
+import { SatpLoggerProvider as LoggerProvider } from "../../../../main/typescript/core/satp-logger-provider";
 import {
   Address,
   GatewayIdentity,
@@ -58,11 +58,14 @@ const createMockSession = (hashes?: MessageStagesHashes): SATPSession => {
 };
 
 const logLevel: LogLevelDesc = "DEBUG";
-const log = LoggerProvider.getOrCreate({
-  level: logLevel,
-  label: "RollbackStrategyFactory",
-});
 const monitorService = MonitorService.createOrGetMonitorService({});
+const log = LoggerProvider.getOrCreate(
+  {
+    level: logLevel,
+    label: "RollbackStrategyFactory",
+  },
+  monitorService,
+);
 
 describe("RollbackStrategyFactory Tests", () => {
   let factory: RollbackStrategyFactory;
@@ -104,7 +107,9 @@ describe("RollbackStrategyFactory Tests", () => {
       logLevel: "DEBUG",
       ontologyOptions: {
         ontologiesPath: ontologiesPath,
+        monitorService: monitorService,
       },
+      monitorService: monitorService,
     };
     bridgesManager = new SATPCrossChainManager(bridgesManagerOptions);
 

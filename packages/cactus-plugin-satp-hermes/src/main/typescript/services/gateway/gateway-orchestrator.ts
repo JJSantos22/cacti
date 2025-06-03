@@ -3,9 +3,9 @@ import {
   ILoggerOptions,
   JsObjectSigner,
   LogLevelDesc,
-  Logger,
-  LoggerProvider,
 } from "@hyperledger/cactus-common";
+import { Satp_Logger as Logger } from "../../core/satp-logger";
+import { SatpLoggerProvider as LoggerProvider } from "../../core/satp-logger-provider";
 import {
   GatewayIdentity,
   GatewayChannel,
@@ -73,7 +73,7 @@ export class GatewayOrchestrator {
     };
     this.monitorService = options.monitorService;
 
-    this.logger = LoggerProvider.getOrCreate(logOptions);
+    this.logger = LoggerProvider.getOrCreate(logOptions, this.monitorService);
     this.logger.info("Initializing Gateway Connection Manager");
     this.logger.info("Gateway Coordinator initialized");
     this.crashEnabled = options.enableCrashRecovery ?? false;

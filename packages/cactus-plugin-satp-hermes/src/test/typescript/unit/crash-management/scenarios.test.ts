@@ -145,7 +145,9 @@ beforeAll(async () => {
     logLevel: "DEBUG",
     ontologyOptions: {
       ontologiesPath: ontologiesPath,
+      monitorService: monitorService,
     },
+    monitorService: monitorService,
   };
 
   const bridgesManager = new SATPCrossChainManager(bridgesManagerOptions);

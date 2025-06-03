@@ -1,4 +1,5 @@
-import { Logger, LogLevelDesc } from "@hyperledger/cactus-common";
+import { LogLevelDesc } from "@hyperledger/cactus-common";
+import { Satp_Logger as Logger } from "../../main/typescript/core/satp-logger";
 import {
   AdminApi,
   OracleApi,

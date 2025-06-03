@@ -27,6 +27,7 @@ export interface MonitorServiceOptions {
 
 export const counters: Map<string, UpDownCounter> = new Map();
 
+/* Monitor Service for SATP Hermes */
 export class MonitorService {
   public readonly label = "MonitorService";
   private readonly logger: Logger;
