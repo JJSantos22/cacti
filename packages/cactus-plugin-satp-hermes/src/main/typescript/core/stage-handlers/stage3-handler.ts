@@ -836,21 +836,31 @@ export class Stage3SATPHandler implements SATPHandler {
           attributes.recipientLedgerAssetId =
             session.getServerSessionData().recipientLedgerAssetId || undefined;
 
-          const stage3Str =
-            session.getServerSessionData().processedTimestamps?.stage3
-              ?.transferCompleteResponseMessageTimestamp;
           const stage0Str =
             session.getClientSessionData().processedTimestamps?.stage0
               ?.newSessionRequestMessageTimestamp;
+          const stage3Str =
+            session.getServerSessionData().processedTimestamps?.stage3
+              ?.transferCompleteResponseMessageTimestamp;
 
           if (stage0Str && stage3Str) {
             const duration = Number(stage3Str) - Number(stage0Str);
-            await this.monitorService.incrementCounter(
-              "transfer_duration",
+            await this.monitorService.recordHistogram(
+            "transaction_duration",
               duration,
               attributes,
             );
           }
+          this.monitorService.recordHistogram(
+            "transaction_gas_used",
+            Number(JSON.parse(session.getClientSessionData().senderWrapAssertionClaim?.receipt ?? "{}").gas ?? 0) + Number(JSON.parse(session.getClientSessionData().lockAssertionClaim?.receipt ?? "{}").gas ?? 0) + Number(JSON.parse(session.getClientSessionData().burnAssertionClaim?.receipt ?? "{}").gas ?? 0),
+            { ...attributes, side: "client" },
+          );
+          this.monitorService.recordHistogram(
+            "transaction_gas_used",
+            Number(JSON.parse(session.getServerSessionData().receiverWrapAssertionClaim?.receipt ?? "{}").gas ?? 0) + Number(JSON.parse(session.getServerSessionData().mintAssertionClaim?.receipt ?? "{}").gas ?? 0),
+            { ...attributes, side: "server" },
+          );
           this.monitorService.incrementCounter(
             "successful_transactions",
             1,

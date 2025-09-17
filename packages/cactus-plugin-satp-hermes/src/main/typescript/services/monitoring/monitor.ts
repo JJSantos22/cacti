@@ -147,6 +147,27 @@ export class MonitorService {
         instrumentations: [getNodeAutoInstrumentations()],
         views: [
           new View({
+            instrumentName: "transaction_duration",
+            instrumentType: InstrumentType.HISTOGRAM,
+            aggregation: new ExplicitBucketHistogramAggregation([
+              1000, 5000, 10000, 20000, 30000, 40000, 50000, 60000
+            ]),
+          }),
+          new View({
+            instrumentName: "transaction_gas_used",
+            instrumentType: InstrumentType.HISTOGRAM,
+            aggregation: new ExplicitBucketHistogramAggregation([
+              10000000, 500000000, 1000000000, 5000000000, 10000000000, 50000000000, 100000000000, 500000000000
+            ]),
+          }),
+          new View({
+            instrumentName: "operation_gas_used",
+            instrumentType: InstrumentType.HISTOGRAM,
+            aggregation: new ExplicitBucketHistogramAggregation([
+              10000000, 500000000, 1000000000, 5000000000, 10000000000, 50000000000, 100000000000, 500000000000
+            ]),
+          }),
+          new View({
             instrumentType: InstrumentType.HISTOGRAM,
             aggregation: new ExplicitBucketHistogramAggregation([
               10, 50, 100, 500, 1000, 5000, 10000, 60000,
@@ -177,37 +198,39 @@ export class MonitorService {
 
       this.sdk.start();
 
-      this.createUpDownCounter("gateways", "number of gateways");
+      this.createUpDownCounter("gateways", "Total number of gateways connected");
       this.createUpDownCounter(
         "created_sessions",
-        "total number of sessions created",
+        "Total number of sessions created",
       );
       this.createUpDownCounter(
         "total_value_exchanged",
-        "total value exchanged",
+        "Total token value exchanged",
       );
       this.createUpDownCounter(
         "initiated_transactions",
-        "total number of initiated transactions",
+        "Total number of initiated transactions",
       );
       this.createUpDownCounter(
         "successful_transactions",
-        "total number of successful transactions",
+        "Total number of successful transactions",
       );
       this.createUpDownCounter(
         "failed_transactions",
-        "total number of failed transactions",
-      );
-      this.createUpDownCounter(
-        "transfer_duration",
-        "Transfer duration in milliseconds",
+        "Total number of failed transactions",
       );
       this.createHistogram(
         "operation_duration",
-        "total duration of operations",
+        "Operation duration in milliseconds",
         "ms",
       );
-      this.createUpDownCounter("gas_used", "total gas used");
+      this.createHistogram(
+        "transaction_duration",
+        "Transaction duration in milliseconds",
+        "ms",
+      );
+      this.createHistogram("transaction_gas_used", "Transaction gas used", "gas");
+      this.createHistogram("operation_gas_used", "Operation gas used", "gas");
       this.createLog(
         "info",
         `${fnTag} - MonitorService initialization complete`,
@@ -262,6 +285,7 @@ export class MonitorService {
    *
    * @param metricName - The name of the histogram to create.
    * @param description - A description of the histogram.
+   * @param unit - The unit of measurement for the histogram (default is "ms").
    * @throws {UninitializedMonitorServiceError} If the NodeSDK is not initialized.
    * @returns {Promise<void>} A promise that resolves when the histogram is created.
    */
@@ -282,13 +306,9 @@ export class MonitorService {
 
     if (!histograms.has(metricName)) {
       const histogram = meter.createHistogram(metricName, {
-        advice: {
-          explicitBucketBoundaries: [
-            10, 50, 100, 500, 1000, 5000, 10000, 60000,
-          ],
-        },
         description,
         unit,
+        valueType: 1,
       });
       histograms.set(metricName, histogram);
       this.logger.debug(`${fnTag} - Created histogram: ${metricName}`);

@@ -286,7 +286,7 @@ beforeAll(async () => {
   await besuEnv.deployAndSetupContracts(ClaimFormat.BUNGEE);
   // Start monitoring system
   startDockerComposeService("otel-lgtm");
-  await executeTransfer("100", 1, "100");
+  await executeTransfer("1500", 15, "100");
 }, TIMEOUT);
 
 afterEach(async () => {
@@ -313,7 +313,7 @@ afterAll(async () => {
       await Containers.logDiagnostics({ logLevel });
       fail("Pruning didn't throw OK");
     });
-  stopDockerComposeService("otel-lgtm");
+  //stopDockerComposeService("otel-lgtm");
 }, TIMEOUT);
 
 describe("otel-lgtm captures information when a transaction occurs", () => {
