@@ -118,9 +118,7 @@ export class OracleManager {
     oracleNetworkOptions: INetworkOptions,
   ): Promise<void> {
     const fnTag = `${OracleManager.CLASS_NAME}#deployOracle()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`${fnTag}, Deploying Oracle...`);
         this.logger.debug(
           `${fnTag}, Oracle Network Options: ${JSON.stringify(oracleNetworkOptions)}`,
@@ -256,14 +254,7 @@ export class OracleManager {
           this.logger.debug(`${fnTag}, Error deploying oracle: ${error}`);
           throw new DeployOracleError(error);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -278,9 +269,7 @@ export class OracleManager {
     claimFormat: ClaimFormat = ClaimFormat.DEFAULT,
   ): OracleAbstract {
     const fnTag = `${OracleManager.CLASS_NAME}#getNetworkOracle()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}, Getting Oracle for Network ID: ${safeStableStringify(id)}`,
         );
@@ -302,14 +291,7 @@ export class OracleManager {
         throw new OracleError(
           `${fnTag}, Oracle not available: ${id}, with Claim Format: ${claimFormat}`,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -324,9 +306,7 @@ export class OracleManager {
     claimType: ClaimFormat = ClaimFormat.DEFAULT,
   ): OracleExecutionLayer {
     const fnTag = `${OracleManager.CLASS_NAME}#getOracleExecutionLayer()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(`${fnTag}, Getting Oracle Execution Layer...`);
 
         return new OracleExecutionLayer({
@@ -335,14 +315,7 @@ export class OracleManager {
           logLevel: this.logLevel,
           monitorService: this.monitorService,
         });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public getTasks(): OracleTask[] {
@@ -351,9 +324,7 @@ export class OracleManager {
 
   public async registerTask(task: OracleTask): Promise<OracleTask> {
     const fnTag = `${OracleManager.CLASS_NAME}#registerTask()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.info(
           `${fnTag}: Registering task. ${safeStableStringify(task)}`,
         );
@@ -422,22 +393,13 @@ export class OracleManager {
           this.logger.debug(`${fnTag}: Error registering task: ${error}`);
           throw new OracleError(error);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   // Unregisters a task by its id.
   public async unregisterTask(taskId: string): Promise<OracleTask> {
     const fnTag = `${OracleManager.CLASS_NAME}#unregisterTask()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.info(`${fnTag}: Unregistering task with id ${taskId}`);
 
         const task = this.taskStatusMap.get(taskId);
@@ -461,21 +423,12 @@ export class OracleManager {
         this.logger.info(`${fnTag}: Task with id ${taskId} unregistered`);
 
         return task;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async executeTask(task: OracleTask): Promise<OracleTask> {
     const fnTag = `${OracleManager.CLASS_NAME}#executeTask()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.info(`${fnTag}: Executing task with id ${task.taskID}`);
 
         this.taskStatusMap.set(task.taskID, task);
@@ -492,14 +445,7 @@ export class OracleManager {
         }
 
         return task;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   // Returns the status for a given task id.
@@ -523,9 +469,7 @@ export class OracleManager {
     params?: string[],
   ): Promise<OracleTask> {
     const fnTag = `${OracleManager.CLASS_NAME}#processTask`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`${fnTag}: Processing task ${task.taskID}`);
 
         // here, we decompose a task into multiple operations as needed and then call
@@ -608,14 +552,7 @@ export class OracleManager {
 
         this.logger.debug(`${fnTag}: Task ${task.taskID} processed.`);
         return task;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -626,9 +563,7 @@ export class OracleManager {
     operation: OracleOperation,
   ): Promise<OracleResponse> {
     const fnTag = `${OracleManager.CLASS_NAME}#relayOperation`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Relaying operation ${operation.id} to network ${safeStableStringify(operation.networkId)}`,
         );
@@ -673,30 +608,14 @@ export class OracleManager {
           `${fnTag}: Operation ${operation.id} relayed successfully`,
         );
         return response;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async shutdown(): Promise<void> {
     const fnTag = `${OracleManager.CLASS_NAME}#shutdown`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`${fnTag}: Shutting down all listeners.`);
         await this.schedulerManager.clearAll();
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

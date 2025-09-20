@@ -40,9 +40,7 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
     role: Type,
   ): Promise<RollbackState> {
     const fnTag = "Stage3RollbackStrategy#execute";
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.info(`${fnTag} Executing rollback for Stage 3`);
 
         if (!session) {
@@ -81,14 +79,7 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
           `${fnTag} Rollback of ${SATPStage[4]} completed with status: ${rollbackState.status}`,
         );
         return rollbackState;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async handleClientSideRollback(
@@ -96,9 +87,7 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
     rollbackState: RollbackState,
   ): Promise<void> {
     const fnTag = "Stage3RollbackStrategy#handleClientSideRollback";
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, async () => {
-      try {
+    
         try {
           const networkId = {
             id: clientSessionData.senderGatewayNetworkId,
@@ -156,14 +145,7 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
             }),
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async handleServerSideRollback(
@@ -171,9 +153,7 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
     rollbackState: RollbackState,
   ): Promise<void> {
     const fnTag = "Stage3RollbackStrategy#handleServerSideRollback";
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, async () => {
-      try {
+    
         try {
           const networkId = {
             id: serverSessionData.recipientGatewayNetworkId,
@@ -232,14 +212,7 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
             }),
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async cleanup(
@@ -247,9 +220,7 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
     state: RollbackState,
   ): Promise<RollbackState> {
     const fnTag = "Stage3RollbackStrategy#cleanup";
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.info(`${fnTag} Cleaning up after Stage 3 rollback`);
 
         if (!session) {
@@ -267,13 +238,6 @@ export class Stage3RollbackStrategy implements RollbackStrategy {
           this.log.error(`${fnTag} Cleanup failed: ${error}`);
           return state;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

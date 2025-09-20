@@ -48,9 +48,7 @@ export class OracleSchedulerManager {
    */
   addPoller(id: string, callback: () => void, intervalMs: number): void {
     const fnTag = `${OracleSchedulerManager.CLASS_NAME}#addPoller`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Create poller for task ${id} with interval ${intervalMs} ms`,
         );
@@ -60,14 +58,7 @@ export class OracleSchedulerManager {
 
         const interval = setInterval(callback, intervalMs);
         this.pollers.set(id, interval);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -76,9 +67,7 @@ export class OracleSchedulerManager {
    */
   removePoller(id: string): void {
     const fnTag = `${OracleSchedulerManager.CLASS_NAME}#removePoller`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         const interval = this.pollers.get(id);
         if (!interval) {
           throw new Error(`Poller with id "${id}" does not exist.`);
@@ -86,14 +75,7 @@ export class OracleSchedulerManager {
 
         clearInterval(interval);
         this.pollers.delete(id);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -125,9 +107,7 @@ export class OracleSchedulerManager {
     filter?: string[],
   ): Promise<void> {
     const fnTag = `${OracleSchedulerManager.CLASS_NAME}#addEventListener`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Adding event listener for oracle with args: ${JSON.stringify(args)}`,
         );
@@ -141,14 +121,7 @@ export class OracleSchedulerManager {
         );
 
         this.eventListeners.set(taskId, subscriber);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -157,9 +130,7 @@ export class OracleSchedulerManager {
    */
   async removeEventListener(taskId: string): Promise<void> {
     const fnTag = `${OracleSchedulerManager.CLASS_NAME}#removeEventListener`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Removing event listener with taskId: ${taskId}`,
         );
@@ -176,14 +147,7 @@ export class OracleSchedulerManager {
         this.logger.debug(
           `${fnTag}: Event listener with taskId: ${taskId} removed successfully`,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -191,9 +155,7 @@ export class OracleSchedulerManager {
    */
   async clearAll(): Promise<void> {
     const fnTag = `${OracleSchedulerManager.CLASS_NAME}#clearAllListeners`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.logger.info(
           `${OracleSchedulerManager.CLASS_NAME}#clearAllListeners(): Clearing ${this.pollers.size} pollers`,
         );
@@ -210,13 +172,6 @@ export class OracleSchedulerManager {
         this.logger.info(
           `${OracleSchedulerManager.CLASS_NAME}#clearAllListeners(): All listeners cleared`,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

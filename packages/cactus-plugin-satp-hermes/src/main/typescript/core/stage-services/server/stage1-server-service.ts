@@ -74,9 +74,7 @@ export class Stage1ServerService extends SATPService {
   ): Promise<void | TransferProposalResponse> {
     const stepTag = `transferProposalResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.INIT_RECEIPT];
         this.Log.debug(`${fnTag}, transferProposalResponse...`);
 
@@ -207,14 +205,7 @@ export class Stage1ServerService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async transferProposalErrorResponse(
@@ -222,9 +213,7 @@ export class Stage1ServerService extends SATPService {
     session?: SATPSession,
   ): Promise<TransferProposalResponse> {
     const fnTag = `${this.getServiceIdentifier()}#transferProposalErrorResponse()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const errorResponse = create(TransferProposalResponseSchema, {});
         const commonBody = create(CommonSatpSchema, {
           messageType: MessageType.PRE_INIT_RECEIPT,
@@ -244,14 +233,7 @@ export class Stage1ServerService extends SATPService {
         errorResponse.serverSignature = messageSignature;
 
         return errorResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async transferCommenceErrorResponse(
@@ -259,9 +241,7 @@ export class Stage1ServerService extends SATPService {
     session?: SATPSession,
   ): Promise<TransferCommenceResponse> {
     const fnTag = `${this.getServiceIdentifier()}#transferCommenceErrorResponse()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const errorResponse = create(TransferCommenceResponseSchema, {});
         const commonBody = create(CommonSatpSchema, {
           messageType: MessageType.TRANSFER_COMMENCE_RESPONSE,
@@ -281,14 +261,7 @@ export class Stage1ServerService extends SATPService {
         errorResponse.serverSignature = messageSignature;
 
         return errorResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async transferCommenceResponse(
@@ -297,9 +270,7 @@ export class Stage1ServerService extends SATPService {
   ): Promise<void | TransferCommenceResponse> {
     const stepTag = `transferCommenceResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.TRANSFER_COMMENCE_RESPONSE];
         this.Log.debug(`${fnTag}, transferCommenceResponse...`);
 
@@ -400,14 +371,7 @@ export class Stage1ServerService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkTransferProposalRequestMessage(
@@ -417,9 +381,7 @@ export class Stage1ServerService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkTransferProposalRequestMessage()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkTransferProposalRequestMessage...`);
 
         if (session == undefined) {
@@ -511,14 +473,7 @@ export class Stage1ServerService extends SATPService {
         );
 
         this.Log.info(`${fnTag}, TransferProposalRequest passed all checks.`);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkTransferCommenceRequestMessage(
@@ -527,9 +482,7 @@ export class Stage1ServerService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkTransferCommenceRequestMessage()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         if (session == undefined) {
           throw new SessionError(fnTag);
         }
@@ -578,14 +531,7 @@ export class Stage1ServerService extends SATPService {
         sessionData.state = State.ONGOING;
 
         this.Log.info(`${fnTag}, TransferCommenceRequest passed all checks.`);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private checkTransferClaims(
@@ -595,9 +541,7 @@ export class Stage1ServerService extends SATPService {
     const stepTag = `checkTransferClaims()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (transferClaims == undefined) {
           throw new TransferInitClaimsError(tag);
         }
@@ -645,14 +589,7 @@ export class Stage1ServerService extends SATPService {
         }
         //todo
         return true;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private checkNetworkCapabilities(
@@ -662,9 +599,7 @@ export class Stage1ServerService extends SATPService {
     const stepTag = `checkNetworkCapabilities()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (networkCapabilities == undefined) {
           throw new NetworkCapabilitiesError(tag);
         }
@@ -699,14 +634,7 @@ export class Stage1ServerService extends SATPService {
         }
         //todo
         return true;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -715,18 +643,9 @@ export class Stage1ServerService extends SATPService {
   ): TransferClaims {
     const stepTag = `counterProposalTransferClaims()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //todo
         return oldClaims;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

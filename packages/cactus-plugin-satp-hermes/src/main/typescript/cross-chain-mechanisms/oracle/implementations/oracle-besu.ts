@@ -143,26 +143,15 @@ export class OracleBesu extends OracleAbstract {
 
   public deployContracts(): Promise<void> {
     const fnTag = `${OracleBesu.CLASS_NAME}#deployContracts`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         // TODO: Implement contract deployment logic
         return Promise.resolve();
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async updateEntry(args: IBesuOracleEntry): Promise<OracleResponse> {
     const fnTag = `${OracleBesu.CLASS_NAME}#updateEntry`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`${fnTag}: Updating args}`);
 
         if (!args.contractName || !args.contractAddress) {
@@ -197,21 +186,12 @@ export class OracleBesu extends OracleAbstract {
         transactionResponse.proof = undefined;
 
         return transactionResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async readEntry(args: IBesuOracleEntry): Promise<OracleResponse> {
     const fnTag = `${OracleBesu.CLASS_NAME}#readEntry`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Reading entry with args: ${safeStableStringify(args)}`,
         );
@@ -235,14 +215,7 @@ export class OracleBesu extends OracleAbstract {
           output: response.callOutput,
           proof,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   // TODO: Dependent on the implementation of the event listener (#3844)
@@ -256,25 +229,14 @@ export class OracleBesu extends OracleAbstract {
     filter: string[],
   ): Promise<{ unsubscribe: () => void }> {
     const fnTag = `${OracleBesu.CLASS_NAME}#subscribeContractEvent`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         throw new Error("Method not implemented.");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public convertOperationToEntry(operation: OracleOperation): IBesuOracleEntry {
     const fnTag = `${OracleBesu.CLASS_NAME}#convertOperationToEntry`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Converting operation to entry: ${safeStableStringify(operation)}`,
         );
@@ -300,13 +262,6 @@ export class OracleBesu extends OracleAbstract {
           methodName: contract.methodName,
           params: contract.params!,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

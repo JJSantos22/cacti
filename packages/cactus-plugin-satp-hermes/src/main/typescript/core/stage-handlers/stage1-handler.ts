@@ -75,9 +75,7 @@ export class Stage1SATPHandler implements SATPHandler {
   ): Promise<TransferProposalResponse> {
     const stepTag = `TransferProposalImplementation()`;
     const fnTag = `${this.getHandlerIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const attributes: Record<
           string,
           | undefined
@@ -98,7 +96,7 @@ export class Stage1SATPHandler implements SATPHandler {
             throw new SessionNotFoundError(fnTag);
           }
 
-          span.setAttribute("sessionId", session.getSessionId() || "");
+          
 
           await this.serverService.checkTransferProposalRequestMessage(
             req,
@@ -128,53 +126,6 @@ export class Stage1SATPHandler implements SATPHandler {
 
           saveMessageInSessionData(session.getServerSessionData(), message);
 
-          span.setAttribute("sessionId", session.getSessionId());
-          span.setAttribute(
-            "senderNetworkId",
-            session?.getClientSessionData().senderAsset?.networkId?.id ?? "",
-          );
-          span.setAttribute(
-            "receiverNetworkId",
-            session?.getServerSessionData().receiverAsset?.networkId?.id ?? "",
-          );
-
-          attributes.senderNetworkId =
-            session?.getClientSessionData().senderAsset?.networkId?.id ||
-            undefined;
-          attributes.receiverNetworkId =
-            session?.getServerSessionData().receiverAsset?.networkId?.id ||
-            undefined;
-          attributes.senderGatewayNetworkId =
-            session?.getClientSessionData().senderGatewayNetworkId || undefined;
-          attributes.receiverGatewayNetworkId =
-            session?.getServerSessionData().recipientGatewayNetworkId ||
-            undefined;
-          attributes.assetProfileId =
-            session?.getServerSessionData().assetProfileId || undefined;
-          attributes.sessionId = session?.getSessionId() || undefined;
-          attributes.sourceLedgerAssetId =
-            session?.getClientSessionData().sourceLedgerAssetId || undefined;
-          attributes.recipientLedgerAssetId =
-            session?.getServerSessionData().recipientLedgerAssetId || undefined;
-          attributes.satp_phase = 1;
-          attributes.operation = "transferProposal";
-
-          const startTimestamp =
-            session.getClientSessionData().processedTimestamps?.stage1
-              ?.transferProposalRequestMessageTimestamp;
-          const endTimestamp =
-            session.getServerSessionData().processedTimestamps?.stage1
-              ?.transferProposalReceiptMessageTimestamp;
-
-          if (startTimestamp && endTimestamp) {
-            const duration = Number(endTimestamp) - Number(startTimestamp);
-            await this.monitorService.recordHistogram(
-              "operation_duration",
-              duration,
-              attributes,
-            );
-          }
-
           return message;
         } catch (error) {
           this.Log.error(
@@ -190,14 +141,7 @@ export class Stage1SATPHandler implements SATPHandler {
             session,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async TransferCommenceImplementation(
@@ -206,13 +150,7 @@ export class Stage1SATPHandler implements SATPHandler {
   ): Promise<TransferCommenceResponse> {
     const stepTag = `TransferProposalImplementation()`;
     const fnTag = `${this.getHandlerIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         let session: SATPSession | undefined;
         try {
           this.Log.debug(`${fnTag}, Transfer Commence...`);
@@ -222,47 +160,6 @@ export class Stage1SATPHandler implements SATPHandler {
           if (!session) {
             throw new SessionNotFoundError(fnTag);
           }
-
-          span.setAttribute("sessionId", session.getSessionId());
-          span.setAttribute(
-            "senderNetworkId",
-            session?.getClientSessionData().senderAsset?.networkId?.id ?? "",
-          );
-          span.setAttribute(
-            "receiverNetworkId",
-            session?.getServerSessionData().receiverAsset?.networkId?.id ?? "",
-          );
-
-          attributes.senderNetworkId =
-            session?.getClientSessionData().senderAsset?.networkId?.id ||
-            undefined;
-          attributes.receiverNetworkId =
-            session?.getServerSessionData().receiverAsset?.networkId?.id ||
-            undefined;
-          attributes.senderGatewayNetworkId =
-            session?.getClientSessionData().senderGatewayNetworkId || undefined;
-          attributes.receiverGatewayNetworkId =
-            session?.getServerSessionData().recipientGatewayNetworkId ||
-            undefined;
-          attributes.assetProfileId =
-            session?.getServerSessionData().assetProfileId || undefined;
-          attributes.sessionId = session?.getSessionId() || undefined;
-          attributes.sourceLedgerAssetId =
-            session?.getClientSessionData().sourceLedgerAssetId || undefined;
-          attributes.recipientLedgerAssetId =
-            session?.getServerSessionData().recipientLedgerAssetId || undefined;
-
-          this.monitorService.updateCounter(
-            "initiated_transactions",
-            1,
-            attributes,
-          );
-
-          this.monitorService.updateCounter(
-            "ongoing_transactions",
-            1,
-            attributes,
-          );
 
           await this.serverService.checkTransferCommenceRequestMessage(
             req,
@@ -289,43 +186,6 @@ export class Stage1SATPHandler implements SATPHandler {
 
           saveMessageInSessionData(session.getServerSessionData(), message);
 
-          attributes.senderNetworkId =
-            session?.getServerSessionData().senderAsset?.networkId?.id ||
-            undefined;
-          attributes.receiverNetworkId =
-            session?.getServerSessionData().receiverAsset?.networkId?.id ||
-            undefined;
-          attributes.senderGatewayNetworkId =
-            session?.getClientSessionData().senderGatewayNetworkId || undefined;
-          attributes.receiverGatewayNetworkId =
-            session?.getServerSessionData().recipientGatewayNetworkId ||
-            undefined;
-          attributes.assetProfileId =
-            session?.getServerSessionData().assetProfileId || undefined;
-          attributes.sessionId = session?.getSessionId() || undefined;
-          attributes.sourceLedgerAssetId =
-            session?.getClientSessionData().sourceLedgerAssetId || undefined;
-          attributes.recipientLedgerAssetId =
-            session?.getServerSessionData().recipientLedgerAssetId || undefined;
-          attributes.satp_phase = 1;
-          attributes.operation = "transferCommence";
-
-          const startTimestamp =
-            session.getClientSessionData().processedTimestamps?.stage1
-              ?.transferCommenceRequestMessageTimestamp;
-          const endTimestamp =
-            session.getServerSessionData().processedTimestamps?.stage1
-              ?.transferCommenceResponseMessageTimestamp;
-
-          if (startTimestamp && endTimestamp) {
-            const duration = Number(endTimestamp) - Number(startTimestamp);
-            await this.monitorService.recordHistogram(
-              "operation_duration",
-              duration,
-              attributes,
-            );
-          }
-
           return message;
         } catch (error) {
           this.Log.error(
@@ -337,57 +197,17 @@ export class Stage1SATPHandler implements SATPHandler {
           );
           setError(session, MessageType.TRANSFER_COMMENCE_RESPONSE, error);
 
-          attributes.senderNetworkId =
-            session?.getServerSessionData().senderAsset?.networkId?.id ||
-            undefined;
-          attributes.receiverNetworkId =
-            session?.getServerSessionData().receiverAsset?.networkId?.id ||
-            undefined;
-          attributes.senderGatewayNetworkId =
-            session?.getClientSessionData().senderGatewayNetworkId || undefined;
-          attributes.receiverGatewayNetworkId =
-            session?.getServerSessionData().recipientGatewayNetworkId ||
-            undefined;
-          attributes.assetProfileId =
-            session?.getServerSessionData().assetProfileId || undefined;
-          attributes.sessionId = session?.getSessionId() || undefined;
-          attributes.sourceLedgerAssetId =
-            session?.getClientSessionData().sourceLedgerAssetId || undefined;
-          attributes.recipientLedgerAssetId =
-            session?.getServerSessionData().recipientLedgerAssetId || undefined;
-          attributes.satp_phase = 1;
-
-          this.monitorService.updateCounter(
-            "ongoing_transactions",
-            -1,
-            attributes,
-          );
-
-          this.monitorService.updateCounter(
-            "failed_transactions",
-            1,
-            attributes,
-          );
           return await this.serverService.transferCommenceErrorResponse(
             error,
             session,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   setupRouter(router: ConnectRouter): void {
     const fnTag = `${this.getHandlerIdentifier()}#setupRouter`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const that = this;
         router.service(SatpStage1Service, {
@@ -398,14 +218,7 @@ export class Stage1SATPHandler implements SATPHandler {
             return await that.TransferCommenceImplementation(req)!;
           },
         });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   //client side
@@ -415,9 +228,7 @@ export class Stage1SATPHandler implements SATPHandler {
   ): Promise<TransferProposalRequest> {
     const stepTag = `TransferProposalRequest()`;
     const fnTag = `${this.getHandlerIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         let session: SATPSession | undefined;
         try {
           this.Log.debug(`${fnTag}, Transfer Proposal Request...`);
@@ -468,14 +279,7 @@ export class Stage1SATPHandler implements SATPHandler {
             error,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   //client side
@@ -484,13 +288,7 @@ export class Stage1SATPHandler implements SATPHandler {
   ): Promise<TransferCommenceRequest> {
     const stepTag = `TransferProposalRequest()`;
     const fnTag = `${this.getHandlerIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         let session: SATPSession | undefined;
         try {
           this.Log.debug(`${fnTag}, Transfer Commence Request...`);
@@ -505,7 +303,7 @@ export class Stage1SATPHandler implements SATPHandler {
             throw new Error(`${fnTag}, Session not found`);
           }
 
-          span.setAttribute("sessionId", session.getSessionId() || "");
+          
 
           await this.clientService.checkTransferProposalResponse(
             response,
@@ -540,50 +338,12 @@ export class Stage1SATPHandler implements SATPHandler {
           );
           setError(session, MessageType.TRANSFER_COMMENCE_REQUEST, error);
 
-          attributes.senderNetworkId =
-            session?.getServerSessionData().senderAsset?.networkId?.id ||
-            undefined;
-          attributes.receiverNetworkId =
-            session?.getServerSessionData().receiverAsset?.networkId?.id ||
-            undefined;
-          attributes.senderGatewayNetworkId =
-            session?.getClientSessionData().senderGatewayNetworkId || undefined;
-          attributes.receiverGatewayNetworkId =
-            session?.getServerSessionData().recipientGatewayNetworkId ||
-            undefined;
-          attributes.assetProfileId =
-            session?.getServerSessionData().assetProfileId || undefined;
-          attributes.sessionId = session?.getSessionId() || undefined;
-          attributes.sourceLedgerAssetId =
-            session?.getClientSessionData().sourceLedgerAssetId || undefined;
-          attributes.recipientLedgerAssetId =
-            session?.getServerSessionData().recipientLedgerAssetId || undefined;
-          attributes.satp_phase = 1;
-
-          this.monitorService.updateCounter(
-            "ongoing_transactions",
-            -1,
-            attributes,
-          );
-
-          this.monitorService.updateCounter(
-            "failed_transactions",
-            1,
-            attributes,
-          );
           throw new FailedToProcessError(
             fnTag,
             getMessageTypeName(MessageType.TRANSFER_COMMENCE_REQUEST),
             error,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

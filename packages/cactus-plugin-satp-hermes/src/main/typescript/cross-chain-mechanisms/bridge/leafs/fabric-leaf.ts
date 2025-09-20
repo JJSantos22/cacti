@@ -228,10 +228,7 @@ export class FabricLeaf
     this.ontologyManager = ontologyManager;
 
     this.signingCredential = options.signingCredential;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         for (const claim of this.claimFormats) {
           switch (claim) {
             case ClaimFormat.BUNGEE:
@@ -310,17 +307,7 @@ export class FabricLeaf
             `${FabricLeaf.CLASS_NAME}#constructor, Missing variables necessary to deploy the Wrapper Contract, given: ${safeStableStringify(options)}`,
           );
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -340,9 +327,7 @@ export class FabricLeaf
    */
   public getApproveAddress(assetType: TokenType): string {
     const fnTag = `${FabricLeaf.CLASS_NAME}#getApproveAddress`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Getting Approve Address for asset type: ${getEnumKeyByValue(TokenType, assetType)}`,
         );
@@ -366,14 +351,7 @@ export class FabricLeaf
               `${fnTag}, Invalid asset type: ${getEnumKeyByValue(TokenType, assetType)}`,
             );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -387,21 +365,12 @@ export class FabricLeaf
    */
   public async deployContracts(): Promise<void> {
     const fnTag = `${FabricLeaf.CLASS_NAME}#deployContracts`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         await Promise.all([
           this.deployFungibleWrapperContract(),
           // this.deployNonFungibleWrapperContract(),
         ]);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -412,19 +381,10 @@ export class FabricLeaf
    */
   public getDeployNonFungibleWrapperContractReceipt(): unknown {
     const fnTag = `${FabricLeaf.CLASS_NAME}#getDeployNonFungibleWrapperContractReceipt`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //TODO implement
         throw new Error("Method not implemented.");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -433,19 +393,10 @@ export class FabricLeaf
    **/
   public deployNonFungibleWrapperContract(): Promise<void> {
     const fnTag = `${FabricLeaf.CLASS_NAME}#deployNonFungibleWrapperContract`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //TODO implement
         throw new Error("Method not implemented.");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -456,23 +407,14 @@ export class FabricLeaf
    */
   public getDeployFungibleWrapperContractReceipt(): DeployContractV1Response {
     const fnTag = `${FabricLeaf.CLASS_NAME}#getDeployFungibleWrapperContractReceipt`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (!this.wrapperFungibleDeployReceipt) {
           throw new ReceiptError(
             `${FabricLeaf.CLASS_NAME}#getDeployFungibleWrapperContractReceipt() Fungible Wrapper Contract Not deployed`,
           );
         }
         return this.wrapperFungibleDeployReceipt;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -487,9 +429,7 @@ export class FabricLeaf
     contractName?: string,
   ): Promise<void> {
     const fnTag = `${FabricLeaf.CLASS_NAME}#deployWrapperContract`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Deploying Wrapper Contract`);
 
         if (!this.contractChannel) {
@@ -721,14 +661,7 @@ export class FabricLeaf
             `${fnTag}, Wrapper Contract bridge setting failed`,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -740,9 +673,7 @@ export class FabricLeaf
    */
   public getWrapperContract(type: "FUNGIBLE" | "NONFUNGIBLE"): string {
     const fnTag = `${FabricLeaf.CLASS_NAME}#getWrapperContract`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Wrapper Contract Adress`);
         switch (type) {
           case "FUNGIBLE":
@@ -762,14 +693,7 @@ export class FabricLeaf
               `${fnTag}, Invalid wrapper contract`,
             );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -782,9 +706,7 @@ export class FabricLeaf
    */
   public async wrapAsset(asset: FabricAsset): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#wrapAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Wrapping Asset: {${asset.id}, ${asset.owner}, ${asset.type}}`,
         );
@@ -826,14 +748,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -846,9 +761,7 @@ export class FabricLeaf
    */
   public async unwrapAsset(assetId: string): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#unwrapAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Unwrapping Asset: ${assetId}`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -874,14 +787,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -898,9 +804,7 @@ export class FabricLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#lockAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Locking Asset: ${assetId} amount: ${amount}`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -926,14 +830,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -950,9 +847,7 @@ export class FabricLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#unlockAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Unlocking Asset: ${assetId} amount: ${amount}`,
         );
@@ -980,14 +875,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1004,9 +892,7 @@ export class FabricLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#mintAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Minting Asset: ${assetId} amount: ${amount}`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -1032,14 +918,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1056,9 +935,7 @@ export class FabricLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#burnAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Burning Asset: ${assetId} amount: ${amount}`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -1084,14 +961,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1110,9 +980,7 @@ export class FabricLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#assignAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Assigning Asset: ${assetId} amount: ${amount} to: ${to}`,
         );
@@ -1140,14 +1008,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
   /**
    * Retrieves all asset IDs.
@@ -1158,9 +1019,7 @@ export class FabricLeaf
    */
   public async getAsset(assetId: string): Promise<FabricAsset> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#getAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Asset`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -1195,14 +1054,7 @@ export class FabricLeaf
           amount: token.amount.toString(),
           network: this.networkIdentification,
         } as FabricAsset;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1221,9 +1073,7 @@ export class FabricLeaf
    */
   public async getAssets(): Promise<string[]> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#getAssets`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Assets`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -1246,14 +1096,7 @@ export class FabricLeaf
         }
 
         return JSON.parse(response.functionOutput);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1267,9 +1110,7 @@ export class FabricLeaf
    */
   public async getClientId(): Promise<string> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#getClientId`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Client Id`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -1292,14 +1133,7 @@ export class FabricLeaf
         }
 
         return response.functionOutput;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1316,9 +1150,7 @@ export class FabricLeaf
     params: string[],
   ): Promise<TransactionResponse> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#runTransaction`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Running Transaction: ${methodName} with params: ${params}`,
         );
@@ -1346,14 +1178,7 @@ export class FabricLeaf
           transactionId: response.transactionId,
           output: response.functionOutput,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1367,9 +1192,7 @@ export class FabricLeaf
    */
   public async getView(assetId: string): Promise<string> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#getView`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting View: ${assetId}`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -1409,14 +1232,7 @@ export class FabricLeaf
           console.error(error);
           return "";
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1428,9 +1244,7 @@ export class FabricLeaf
    */
   public async getReceipt(transactionId: string): Promise<string> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#getReceipt`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Receipt: ${transactionId}`);
 
         if (!this.contractChannel || !this.wrapperContractName) {
@@ -1449,14 +1263,7 @@ export class FabricLeaf
         });
 
         return safeStableStringify(receipt);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1472,9 +1279,7 @@ export class FabricLeaf
     claimFormat: ClaimFormat,
   ): Promise<string> {
     const fnTag = `${FabricLeaf.CLASS_NAME}}#runTransaction`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Getting Proof of asset: ${asset.id} with a format of: ${claimFormat}`,
         );
@@ -1491,21 +1296,12 @@ export class FabricLeaf
           default:
             throw new ProofError(`Claim format not supported: ${claimFormat}`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async shutdownConnection(): Promise<void> {
     const fnTag = `${FabricLeaf.CLASS_NAME}#shutdownConnection`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         try {
           await this.connector.shutdown();
           this.log.debug(
@@ -1517,13 +1313,6 @@ export class FabricLeaf
           );
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

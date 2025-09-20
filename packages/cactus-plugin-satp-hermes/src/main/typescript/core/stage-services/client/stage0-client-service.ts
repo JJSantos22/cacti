@@ -90,9 +90,7 @@ export class Stage0ClientService extends SATPService {
   ): Promise<NewSessionRequest> {
     const stepTag = `newSessionRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.NEW_SESSION_REQUEST];
 
         if (!session) {
@@ -172,14 +170,7 @@ export class Stage0ClientService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async checkNewSessionResponse(
@@ -190,9 +181,7 @@ export class Stage0ClientService extends SATPService {
     const stepTag = `checkNewSessionResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (session == undefined) {
           throw new SessionError(fnTag);
         }
@@ -274,14 +263,7 @@ export class Stage0ClientService extends SATPService {
           );
         }
         return session;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async preSATPTransferRequest(
@@ -289,9 +271,7 @@ export class Stage0ClientService extends SATPService {
   ): Promise<PreSATPTransferRequest> {
     const stepTag = `preSATPTransferRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.PRE_SATP_TRANSFER_REQUEST];
 
         if (session == undefined) {
@@ -408,22 +388,13 @@ export class Stage0ClientService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async wrapToken(session: SATPSession): Promise<void> {
     const stepTag = `wrapToken()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.Log.info(`${fnTag}, Wrapping Asset...`);
         if (session == undefined) {
           throw new SessionError(fnTag);
@@ -523,13 +494,6 @@ export class Stage0ClientService extends SATPService {
           });
           throw new FailedToProcessError(fnTag, "WrapToken");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

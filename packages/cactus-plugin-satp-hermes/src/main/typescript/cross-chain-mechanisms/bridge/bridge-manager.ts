@@ -79,10 +79,7 @@ export class BridgeManager
       { label, level: this.logLevel },
       this.monitorService,
     );
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         this.ontologyManager = new OntologyManager(
           {
             ...options.ontologyOptions,
@@ -93,17 +90,7 @@ export class BridgeManager
         if (!this.ontologyManager) {
           throw new Error(`${fnTag}, Ontology Manager is not defined`);
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -117,10 +104,7 @@ export class BridgeManager
    */
   public async deployLeaf(leafNetworkOptions: INetworkOptions): Promise<void> {
     const fnTag = `${BridgeManager.CLASS_NAME}#deployLeaf()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Deploying Leaf...`);
         this.log.debug(
           `${fnTag}, Leaf Network Options: ${JSON.stringify(leafNetworkOptions)}`,
@@ -283,18 +267,7 @@ export class BridgeManager
           this.log.error(`${fnTag}, Error deploying leaf: ${error}`);
           throw new DeployLeafError(error);
         }
-        span.setStatus({ code: SpanStatusCode.OK });
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -309,9 +282,7 @@ export class BridgeManager
     claimFormat: ClaimFormat = ClaimFormat.DEFAULT,
   ): BridgeLeaf {
     const fnTag = `${BridgeManager.CLASS_NAME}#getBridgeEndPoint()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Leaf...`);
         this.log.debug(
           `${fnTag}, Getting Leaf for Network ID: ${safeStableStringify(id)}`,
@@ -334,14 +305,7 @@ export class BridgeManager
         throw new LeafError(
           `${fnTag}, Bridge endpoint not available: ${id}, with Claim Format: ${claimFormat}`,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -351,23 +315,14 @@ export class BridgeManager
    */
   public getAvailableEndPoints(): NetworkId[] {
     const fnTag = `${BridgeManager.CLASS_NAME}#getAvailableEndPoints()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Leafs...`);
         const networkIds: NetworkId[] = [];
         for (const key of this.leafs.keys()) {
           networkIds.push(JSON.parse(key) as NetworkId);
         }
         return networkIds;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -382,9 +337,7 @@ export class BridgeManager
     claimType: ClaimFormat = ClaimFormat.DEFAULT,
   ): SATPBridgeExecutionLayer {
     const fnTag = `${BridgeManager.CLASS_NAME}#getSATPExecutionLayer()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting SATP Execution Layer...`);
 
         return new SATPBridgeExecutionLayerImpl({
@@ -393,14 +346,7 @@ export class BridgeManager
           logLevel: this.logLevel,
           monitorService: this.monitorService,
         });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -418,21 +364,12 @@ export class BridgeManager
     assetType: TokenType,
   ): string {
     const fnTag = `${BridgeManager.CLASS_NAME}#getApproveAddress()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Approve Address...`);
 
         return this.getBridgeEndPoint(networkIdentification).getApproveAddress(
           assetType,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

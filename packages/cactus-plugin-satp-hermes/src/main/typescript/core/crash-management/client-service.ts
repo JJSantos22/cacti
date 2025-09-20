@@ -32,9 +32,7 @@ export class CrashRecoveryClientService {
     sessionData: SessionData,
   ): Promise<RecoverRequest> {
     const fnTag = `${CrashRecoveryClientService.name}#createRecoverRequest`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(
           `${fnTag} - Creating RecoverRequest for sessionId: ${sessionData.id}`,
         );
@@ -60,23 +58,14 @@ export class CrashRecoveryClientService {
         this.log.debug(`${fnTag} - RecoverRequest created:`, recoverMessage);
 
         return recoverMessage;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async createRecoverSuccessRequest(
     sessionData: SessionData,
   ): Promise<RecoverSuccessRequest> {
     const fnTag = `${CrashRecoveryClientService.name}#createRecoverSuccessRequest`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(
           `${fnTag} - Creating RecoverSuccessRequest for sessionId: ${sessionData.id}`,
         );
@@ -103,14 +92,7 @@ export class CrashRecoveryClientService {
         );
 
         return recoverSuccessMessage;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async createRollbackRequest(
@@ -118,9 +100,7 @@ export class CrashRecoveryClientService {
     rollbackState: RollbackState,
   ): Promise<RollbackRequest> {
     const fnTag = `${CrashRecoveryClientService.name}#createRollbackRequest`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(
           `${fnTag} - Creating RollbackRequest for sessionId: ${sessionData.id}`,
         );
@@ -145,13 +125,6 @@ export class CrashRecoveryClientService {
         this.log.debug(`${fnTag} - RollbackRequest created:`, rollbackMessage);
 
         return rollbackMessage;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

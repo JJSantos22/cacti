@@ -73,9 +73,7 @@ export class OracleExecutionLayer implements OracleExecutionLayer {
    */
   public async readEntry(args: IOracleEntryBase): Promise<OracleResponse> {
     const fnTag = `${OracleExecutionLayer.CLASS_NAME}#read()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           return await this.oracleImpl.readEntry(args);
         } catch (error) {
@@ -85,14 +83,7 @@ export class OracleExecutionLayer implements OracleExecutionLayer {
           );
           throw new TransactionError(fnTag, error);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -103,9 +94,7 @@ export class OracleExecutionLayer implements OracleExecutionLayer {
    */
   public async updateEntry(args: IOracleEntryBase): Promise<OracleResponse> {
     const fnTag = `${OracleExecutionLayer.CLASS_NAME}#read()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           return await this.oracleImpl.updateEntry(args);
         } catch (error) {
@@ -115,14 +104,7 @@ export class OracleExecutionLayer implements OracleExecutionLayer {
           );
           throw new TransactionError(fnTag, error);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -133,9 +115,7 @@ export class OracleExecutionLayer implements OracleExecutionLayer {
    */
   public convertOperationToEntry(operation: OracleOperation): IOracleEntryBase {
     const fnTag = `${OracleExecutionLayer.CLASS_NAME}#convertOperationToEntry`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(`${fnTag} - Converting operation to entry`, operation);
 
         try {
@@ -147,13 +127,6 @@ export class OracleExecutionLayer implements OracleExecutionLayer {
           );
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

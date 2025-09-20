@@ -81,7 +81,7 @@ import {
 } from "@hyperledger/cactus-cmd-api-server";
 import { AddressInfo } from "node:net";
 import { createMigrationSource } from "./database/knex-migration-source";
-import { MonitorService } from "./services/monitoring/monitor";
+import { MonitorService, MonitorServiceOptions } from "./services/monitoring/monitor";
 import { context, SpanStatusCode } from "@opentelemetry/api";
 import { SATPManager } from "./services/gateway/satp-manager";
 
@@ -160,7 +160,7 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
       MonitorService.createOrGetMonitorService({
         logLevel: this.config.logLevel,
         enabled: true,
-      });
+      } as MonitorServiceOptions);
     this.initializeMonitorService();
     this.logger = LoggerProvider.getOrCreate(logOptions, this.monitorService);
 
@@ -225,10 +225,6 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
 
     this.OAS = OAS;
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
         if (this.config.gid) {
           const gatewayOrchestratorOptions: IGatewayOrchestratorOptions = {
             logLevel: this.config.logLevel,
@@ -302,14 +298,7 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
         } else {
           this.logger.info("CrashManager is disabled!");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /* ICactus Plugin methods */
@@ -323,62 +312,34 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
 
   public async onPluginInit(): Promise<undefined> {
     const fnTag = `${this.className}#onPluginInit()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         await Promise.all([this.startup()]);
-        span.setStatus({ code: SpanStatusCode.OK });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /* IPluginWebService methods */
   async registerWebServices(app: Express): Promise<IWebServiceEndpoint[]> {
     const fnTag = `${this.className}#registerWebServices()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const webServices = await this.getOrCreateWebServices();
         for (const ws of webServices) {
           this.logger.debug(`Registering service ${ws.getPath()}`);
           ws.registerExpress(app);
         }
         return webServices;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async getOrCreateWebServices(): Promise<IWebServiceEndpoint[]> {
     const fnTag = `${this.className}#getOrCreateWebServices()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         if (!this.BLODispatcher) {
           throw new BLODispatcherErraneousError(fnTag);
         }
         return await this.BLODispatcher?.getOrCreateWebServices();
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /* Getters */
@@ -546,11 +507,6 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
    */
   public async startup(): Promise<void> {
     const fnTag = `${this.className}#startup()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    this.logger.trace(`Entering ${fnTag}`);
-
-    await context.with(ctx, async () => {
-      try {
         await Promise.all([
           this.createDBRepository(),
           this.SATPCCManager?.deployCCMechanisms(this.options.ccConfig!),
@@ -558,23 +514,12 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
 
         // start everything before starting the GOL server
         await this.startupGOLServer();
-        span.setStatus({ code: SpanStatusCode.OK });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+        
   }
 
   public async getOrCreateHttpServer(): Promise<ApiServer> {
     const fnTag = `${this.className}#getOrCreateHttpServer()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
 
         if (this.OApiServer) {
@@ -628,41 +573,21 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
         await this.OApiServer.start();
 
         return this.OApiServer;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public getAddressOApiAddress(): string {
     const fnTag = `${this.className}#getAddressOApiAddress()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    return context.with(ctx, () => {
-      try {
+    
         return (this.config.gid?.address +
           ":" +
           this.config.gid?.gatewayOapiPort) as string;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async createDBRepository(): Promise<void> {
     const fnTag = `${this.className}#createDBRepository()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    await context.with(ctx, async () => {
-      try {
+    
         if (!this.config.localRepository) {
           this.logger.info(`${fnTag}: Local repository is not defined`);
           this.logger.info(`${fnTag}: Using default local repository`);
@@ -682,22 +607,12 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
         });
 
         await database.migrate.latest();
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   protected async startupGOLServer(): Promise<void> {
     const fnTag = `${this.className}#startupGOLServer()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    await context.with(ctx, () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         this.logger.info("Starting GOL server");
 
@@ -729,21 +644,12 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
               this.logger.error(`GOL server failed to start: ${error}`);
               reject(error);
             });
-            span.setStatus({ code: SpanStatusCode.OK });
           } else {
             this.logger.warn("GOL Server already running.");
-            span.setStatus({ code: SpanStatusCode.OK });
             resolve();
           }
         });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -757,39 +663,21 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
   // todo connect to gateway - stage 0
   public async resolveAndAddGateways(IDs: string[]): Promise<void> {
     const fnTag = `${this.className}#resolveAndAddGateways()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         this.logger.info("Connecting to gateway");
         this.gatewayOrchestrator?.resolveAndAddGateways(IDs);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   // todo connect to gateway - stage 0
   public async addGateways(gateways: GatewayIdentity[]): Promise<void> {
     const fnTag = `${this.className}#addGateways()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         this.logger.info("Connecting to gateway");
         this.gatewayOrchestrator?.addGateways(gateways);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -799,29 +687,16 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
    */
   public onShutdown(hook: ShutdownHook): void {
     const fnTag = `${this.className}#onShutdown()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         this.logger.debug(`Adding shutdown hook: ${hook.name}`);
         this.shutdownHooks.push(hook);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async shutdown(): Promise<void> {
     const fnTag = `${this.className}#shutdown()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`Entering ${fnTag}`);
 
         this.logger.debug("Shutting down Gateway Application");
@@ -870,22 +745,12 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
           await this.monitorService.shutdown();
         }
         return;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async shutdownGOLServer(): Promise<void> {
     const fnTag = `${this.className}#shutdownGOLServer()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`Entering ${fnTag}`);
         if (this.GOLServer) {
           try {
@@ -900,21 +765,12 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
         } else {
           this.logger.warn("Server is not running.");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async kill(): Promise<void> {
     const fnTag = `${this.className}#kill()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`Entering ${fnTag}`);
         this.logger.debug("Killing Gateway Application");
 
@@ -950,14 +806,7 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
         this.logger.info(`Closed ${connectionsClosed} connections`);
         this.logger.info("Gateway Coordinator shut down");
         return;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -968,9 +817,7 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
    */
   private async verifySessionsState(): Promise<void> {
     const fnTag = `${this.className}#verifySessionsState()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         if (!this.BLODispatcher) {
           throw new BLODispatcherErraneousError(fnTag);
@@ -978,14 +825,7 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
         this.BLODispatcher.setInitiateShutdown();
         const manager = await this.BLODispatcher.getManager();
         await this.startSessionVerificationJob(manager);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1001,9 +841,7 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
     manager: SATPManager,
   ): Promise<void> {
     const fnTag = `${this.className}#startSessionVerificationJob()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         const cleanup = () => {
           if (this.sessionVerificationJob) {
             this.sessionVerificationJob.cancel();
@@ -1048,14 +886,7 @@ export class SATPGateway implements IPluginWebService, ICactusPlugin {
         if (this.sessionVerificationJob) {
           this.activeJobs.add(this.sessionVerificationJob);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async initializeMonitorService(): Promise<void> {

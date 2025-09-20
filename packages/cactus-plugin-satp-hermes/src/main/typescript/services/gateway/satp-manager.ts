@@ -175,10 +175,7 @@ export class SATPManager {
     this.logger.debug(`${fnTag} dbLogger initialized: ${!!this.dbLogger}`);
     this.sessions = options.sessions || new Map<string, SATPSession>();
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         const handlersClasses = [
           Stage0SATPHandler as unknown as SATPHandlerInstance,
           Stage1SATPHandler as unknown as SATPHandlerInstance,
@@ -222,17 +219,7 @@ export class SATPManager {
         this.orchestrator.addBridgeManager(
           this.ccManager.getClientBridgeManagerInterface(),
         );
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public get pubKey(): string {
@@ -244,9 +231,7 @@ export class SATPManager {
     stageID: string,
   ): SATPService {
     const fnTag = `${SATPManager.CLASS_NAME}#getServiceByStage()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         // we assume stages are numbers
         if (isNaN(Number(stageID))) {
           throw new Error("Invalid stageId");
@@ -264,17 +249,7 @@ export class SATPManager {
           );
         }
         return service;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public get className(): string {
@@ -283,65 +258,28 @@ export class SATPManager {
 
   public healthCheck(): HealthCheckResponseStatusEnum {
     const fnTag = `${SATPManager.CLASS_NAME}#healthCheck`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         return this.status;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
   public getSessions(): Map<string, SATPSession> {
     const fnTag = `${SATPManager.CLASS_NAME}#getSessions`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const activeSessionsCount = this.sessions.size;
         this.logger.debug(`${fnTag} active sessions: ${activeSessionsCount}`);
         return this.sessions;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public getSession(sessionId: string): SATPSession | undefined {
     const fnTag = `${SATPManager.CLASS_NAME}#getSession`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    span.setAttributes({ sessionId });
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(`${fnTag} retrieving session: ${sessionId}`);
         if (this.sessions == undefined) {
           return undefined;
         }
         return this.sessions.get(sessionId);
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public getConnectedDLTs(): NetworkId[] {
@@ -358,9 +296,7 @@ export class SATPManager {
    */
   public getSATPSessionState(): boolean {
     const fnTag = `${SATPManager.CLASS_NAME}#getSATPSessionStatus()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.info(`${fnTag}, Getting SATP Session Status...`);
         for (const value of this.sessions.values()) {
           if (value.getSessionState() !== State.COMPLETED) {
@@ -368,17 +304,7 @@ export class SATPManager {
           }
         }
         return true;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public getOrCreateSession(
@@ -386,9 +312,7 @@ export class SATPManager {
     contextID?: string,
   ): SATPSession {
     const fnTag = `${SATPManager.CLASS_NAME}#getOrCreateSession()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (!sessionId) {
           //TODO maybe compare to ""
           if (!contextID) {
@@ -399,24 +323,12 @@ export class SATPManager {
           const existingSession = this.sessions.get(sessionId);
           return existingSession || this.createNewSession("MOCK_CONTEXT_ID");
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private createNewSession(contextID: string): SATPSession {
     const fnTag = `${SATPManager.CLASS_NAME}#createNewSession()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const session = new SATPSession({
           contextID: contextID,
           server: false,
@@ -425,17 +337,7 @@ export class SATPManager {
         });
         this.sessions?.set(session.getSessionId(), session);
         return session;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   get StageHandlers() {
@@ -449,9 +351,7 @@ export class SATPManager {
     claimFormat: ClaimFormat,
   ): ISATPServiceOptions[] {
     const fnTag = `${SATPManager.CLASS_NAME}#initializeServiceOptions()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.info(`${fnTag}, Initializing services options...`);
         this.logger.info(
           `Initializing ${serviceClasses.length} services options...`,
@@ -468,17 +368,7 @@ export class SATPManager {
           claimFormat: claimFormat,
           monitorService: this.monitorService,
         }));
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private initializeServices(
@@ -486,9 +376,7 @@ export class SATPManager {
     serviceOptions: ISATPServiceOptions[],
   ): void {
     const fnTag = `${SATPManager.CLASS_NAME}#initializeServices()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.info(`${fnTag}, Initializing services...`);
 
         if (serviceClasses.length === 0) {
@@ -516,17 +404,7 @@ export class SATPManager {
             .get(service.stage)
             ?.set(service.serviceType, service);
         });
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private initializeHandlerOptions(
@@ -534,9 +412,7 @@ export class SATPManager {
     level: LogLevelDesc = "DEBUG",
   ): SATPHandlerOptions[] {
     const fnTag = `${SATPManager.CLASS_NAME}#initializeHandlerOptions()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.info(`${fnTag}, Initializing handlers options...`);
 
         const handlersOptions: SATPHandlerOptions[] = [];
@@ -579,17 +455,7 @@ export class SATPManager {
         }
 
         return handlersOptions;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private initializeHandlers(
@@ -597,9 +463,7 @@ export class SATPManager {
     handlersOptions: SATPHandlerOptions[],
   ): void {
     const fnTag = `${SATPManager.CLASS_NAME}#initializeHandlers()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         this.logger.info(`${fnTag}, Initializing handlers...`);
 
         if (handlersClasses.length === 0) {
@@ -624,17 +488,7 @@ export class SATPManager {
             this.satpHandlers.set(handler.getHandlerIdentifier(), handler);
           }
         });
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private loadPubKeys(gateways: Map<string, GatewayIdentity>): void {
@@ -654,9 +508,7 @@ export class SATPManager {
     stage?: MessageType,
   ): Promise<void> {
     const fnTag = `${SATPManager.CLASS_NAME}#transfer()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         try {
           if (!stage) {
             this.logger.debug(
@@ -1266,16 +1118,6 @@ export class SATPManager {
           this.logger.error(`${fnTag}, Failed to transact\nError: ${error}`);
           throw new TransactError(fnTag, error);
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

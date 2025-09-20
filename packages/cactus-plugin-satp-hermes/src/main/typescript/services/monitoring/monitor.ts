@@ -195,48 +195,6 @@ export class MonitorService {
 
       this.sdk.start();
 
-      this.createCounter("gateways", "Total number of gateways connected", "updown");
-      this.createCounter(
-        "created_sessions",
-        "Total number of sessions created",
-      );
-      this.createCounter(
-        "total_value_exchanged",
-        "Total token value exchanged",
-      );
-      this.createCounter(
-        "initiated_transactions",
-        "Total number of initiated transactions",
-      );
-      this.createCounter(
-        "successful_transactions",
-        "Total number of successful transactions",
-      );
-      this.createCounter(
-        "ongoing_transactions",
-        "Total number of ongoing transactions",
-        "updown",
-      );
-      this.createCounter(
-        "failed_transactions",
-        "Total number of failed transactions",
-      );
-      this.createHistogram(
-        "operation_duration",
-        "Operation duration in milliseconds",
-        "ms",
-      );
-      this.createCounter(
-        "transaction_duration",
-        "Transaction duration in milliseconds",
-        "updown"
-      );
-      this.createCounter("transaction_gas_used", "Transaction gas used", "updown");
-      this.createCounter("operation_gas_used", "Operation gas used", "updown");
-      this.createLog(
-        "info",
-        `${fnTag} - MonitorService initialization complete`,
-      );
       this.logger.info(`${fnTag} - MonitorService initialization complete`);
     } else {
       this.logger.warn(
@@ -246,13 +204,13 @@ export class MonitorService {
   }
 
   /**
-   * Creates a metric with the given name and description.
+   * Creates a counter with the given name and description.
    *
-   * @param metricName - The name of the metric to create.
-   * @param description - A description of the metric.
-   * @param type - The type of metric to create ("counter" or "updown", default is "counter").
+   * @param metricName - The name of the counter to create.
+   * @param description - A description of the counter.
+   * @param type - The type of counter to create ("counter" or "updown", default is "counter").
    * @throws {UninitializedMonitorServiceError} If the NodeSDK is not initialized.
-   * @returns {Promise<void>} A promise that resolves when the metric is created.
+   * @returns {Promise<void>} A promise that resolves when the counter is created.
    */
   public async createCounter(
     metricName: string,
@@ -518,7 +476,7 @@ export class MonitorService {
     ...message: unknown[]
   ): Promise<void> {
     const fnTag = `${this.label}#createLog()`;
-    if (!this.isEnabled) return;
+    /* if (!this.isEnabled) return;
     if (!this.sdk) {
       throw new UninitializedMonitorServiceError(
         `${fnTag} - NodeSDK not initialized`,
@@ -529,7 +487,8 @@ export class MonitorService {
       body: message,
       severityText: level as string,
       context: context.active(),
-    } as logsAPI.LogRecord);
+    } as logsAPI.LogRecord); */
+     return;
   }
 
   /**

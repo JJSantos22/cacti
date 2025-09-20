@@ -91,10 +91,7 @@ export class CrashManager {
     this.ccManager = options.ccManager;
     this.loadPubKeys(this.orchestrator.getCounterPartyGateways());
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         this.factory = new RollbackStrategyFactory(
           this.ccManager.getClientBridgeManagerInterface(),
           this.log,
@@ -126,14 +123,7 @@ export class CrashManager {
         const crashRecoveryHandlers = new Map<string, SATPHandler>();
         crashRecoveryHandlers.set("crash-handler", this.crashRecoveryHandler);
         this.orchestrator.addHandlers(crashRecoveryHandlers);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   get className(): string {
@@ -160,9 +150,7 @@ export class CrashManager {
 
   public stopScheduler(): void {
     const fnTag = `${this.className}#stopScheduler()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         if (this.crashScheduler) {
           this.crashScheduler.cancel();
           this.crashScheduler = undefined;
@@ -170,22 +158,13 @@ export class CrashManager {
         } else {
           this.log.warn(`${fnTag} No active crash detection job to stop`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   // TODO: fetch (x) logs to recreate session (for single gateway topology)
   public async recoverSessions(): Promise<void> {
     const fnTag = `${this.className}#recoverSessions()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         try {
           const allLogs = await this.localRepository.readLogsNotProofs();
 
@@ -226,21 +205,12 @@ export class CrashManager {
         } catch (error) {
           this.log.error(`${fnTag} Error during session recovery: ${error}`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private initializeCrashDetection(sessionId: string): void {
     const fnTag = `${this.className}#initializeCrashDetection()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         try {
           // Timeout checker for crash detection of counterparty
           this.crashScheduler = schedule.scheduleJob(
@@ -269,21 +239,12 @@ export class CrashManager {
             `${fnTag} Error initializing crash detection job: ${error}`,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private updateSessionState(sessionId: string, newState: State): string {
     const fnTag = `${this.className}#updateSessionState()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const session = this.sessions.get(sessionId);
         if (!session) {
           throw new Error(`Session with ID ${sessionId} not found.`);
@@ -309,21 +270,12 @@ export class CrashManager {
         }
         this.sessions.set(sessionId, session);
         return updatedState.join(", ");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async checkAndResolveCrashes(session: SATPSession): Promise<void> {
     const fnTag = `${this.className}#checkAndResolveCrashes()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         if (this.sessions.size === 0) {
           this.log.info(
             `${fnTag} No sessions to check. Waiting for new sessions...`,
@@ -357,21 +309,12 @@ export class CrashManager {
             `${fnTag} Server Session ${sessionId} state: ${State[serverSessionData.state]}`,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async checkAndResolveCrash(session: SATPSession): Promise<void> {
     const fnTag = `${this.className}#checkAndResolveCrash()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         const sessionDataList: SessionData[] = [];
         if (session.hasClientSessionData()) {
           sessionDataList.push(session.getClientSessionData());
@@ -463,21 +406,12 @@ export class CrashManager {
             break; // exit after rollback
           }
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async checkCrash(sessionData: SessionData): Promise<CrashStatus> {
     const fnTag = `${this.className}#checkCrash()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           if (!this.localRepository) {
             this.log.error(
@@ -530,21 +464,12 @@ export class CrashManager {
           );
           return CrashStatus.ERROR;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async handleRecovery(sessionData: SessionData): Promise<boolean> {
     const fnTag = `${this.className}#handleRecovery()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag} - Starting crash recovery for sessionId: ${sessionData.id}`,
         );
@@ -630,14 +555,7 @@ export class CrashManager {
           );
           throw new Error(`Recovery failed for session ID: ${sessionData.id}`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async processRecoverRequest(
@@ -645,9 +563,7 @@ export class CrashManager {
     sessionData: SessionData,
   ): Promise<boolean> {
     const fnTag = `${this.className}#processRecoverUpdate()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           verifySignature(
             this.signer,
@@ -705,14 +621,7 @@ export class CrashManager {
           this.log.error(`${fnTag} Error processing RecoverRequest: ${error}`);
           return false;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async initiateRollback(
@@ -721,9 +630,7 @@ export class CrashManager {
     forceRollback?: boolean,
   ): Promise<boolean> {
     const fnTag = `${this.className}#initiateRollback()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         if (!sessionData) {
           throw new Error(
             `${fnTag}, session data is not correctly initialized`,
@@ -772,14 +679,7 @@ export class CrashManager {
           this.log.error(`${fnTag} Error during rollback initiation: ${error}`);
           return false;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async executeRollback(
@@ -787,9 +687,7 @@ export class CrashManager {
     session: SATPSession,
   ): Promise<RollbackState | undefined> {
     const fnTag = `${this.className}#executeRollback()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag} Executing rollback strategy for sessionId: ${session.getSessionId()}`,
         );
@@ -802,14 +700,7 @@ export class CrashManager {
           );
           return undefined;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async sendRollbackMessage(
@@ -817,9 +708,7 @@ export class CrashManager {
     rollbackState: RollbackState,
   ): Promise<boolean> {
     const fnTag = `${this.className}#sendRollbackMessage()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag} - Starting to send RollbackMessage for sessionId: ${sessionData.id}`,
         );
@@ -883,23 +772,14 @@ export class CrashManager {
           );
           return false;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async processRollbackResponse(
     message: RollbackResponse,
   ): Promise<boolean> {
     const fnTag = `${this.className}#processRollbackResponse()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         try {
           if (message.success) {
             this.log.info(
@@ -917,14 +797,7 @@ export class CrashManager {
           );
           return false;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async performCleanup(
@@ -933,9 +806,7 @@ export class CrashManager {
     state: RollbackState,
   ): Promise<boolean> {
     const fnTag = `${this.className}#performCleanup()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag} Performing cleanup after rollback for session ${session.getSessionId()}`,
         );
@@ -953,21 +824,12 @@ export class CrashManager {
           this.log.error(`${fnTag} Error during cleanup: ${error}`);
           return false;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private loadPubKeys(gateways: Map<string, GatewayIdentity>): void {
     const fnTag = `${this.className}#loadPubKeys()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         for (const gateway of gateways.values()) {
           if (gateway.pubKey) {
             this.gatewaysPubKeys.set(gateway.id, gateway.pubKey);
@@ -982,13 +844,6 @@ export class CrashManager {
           this.orchestrator.getSelfId(),
           this.orchestrator.ourGateway.pubKey,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

@@ -50,9 +50,7 @@ export class OracleNotificationDispatcher {
     notification: OracleNotification,
   ): Promise<void> {
     const fnTag = `${OracleNotificationDispatcher.CLASS_NAME}#dispatchNotification`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.log.debug(
           `${fnTag}: Dispatching notification for task ${notification.taskId}`,
         );
@@ -64,13 +62,6 @@ export class OracleNotificationDispatcher {
           this.log.error(`${fnTag}: Failed to dispatch notification:`, error);
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

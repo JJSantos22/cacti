@@ -86,9 +86,7 @@ export class Stage2ClientService extends SATPService {
   ): Promise<void | LockAssertionRequest> {
     const stepTag = `lockAssertionRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.LOCK_ASSERT];
         this.Log.debug(`${fnTag}, lockAssertionRequest...`);
 
@@ -211,14 +209,7 @@ export class Stage2ClientService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkTransferCommenceResponse(
@@ -227,9 +218,7 @@ export class Stage2ClientService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkTransferCommenceResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkTransferCommenceResponse...`);
 
         if (session == undefined) {
@@ -269,22 +258,13 @@ export class Stage2ClientService extends SATPService {
         );
 
         this.Log.info(`${fnTag}, TransferCommenceResponse passed all checks.`);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async lockAsset(session: SATPSession): Promise<void> {
     const stepTag = `lockAsset()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.Log.info(`${fnTag}, Locking Asset...`);
         if (session == undefined) {
           throw new SessionError(fnTag);
@@ -388,13 +368,6 @@ export class Stage2ClientService extends SATPService {
           });
           throw new FailedToProcessError(fnTag, "LockAsset", error);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

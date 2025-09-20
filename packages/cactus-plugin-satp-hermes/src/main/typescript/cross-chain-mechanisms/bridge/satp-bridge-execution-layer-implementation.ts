@@ -85,13 +85,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
    */
   public async wrapAsset(asset: Asset): Promise<TransactionReceipt> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#wrapAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         if (instanceOfFungibleAsset(asset)) {
           const fungibleBridgeEndPoint = this
             .bridgeEndPoint as unknown as BridgeLeafFungible;
@@ -112,19 +106,6 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
             this.claimType,
           );
 
-          const parsedReceipt = JSON.parse(receipt);
-
-          attributes.senderAddress = parsedReceipt.from;
-          attributes.receiverAddress = parsedReceipt.to;
-          attributes.internalNetworkTransactionId = response.transactionId;
-          attributes.assetId = asset.id;
-          attributes.operation = "wrapAsset";
-
-          this.monitorService.updateCounter(
-            "operation_gas_used",
-            parsedReceipt.gas,
-            attributes,
-          );
 
           return {
             receipt,
@@ -133,17 +114,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
         } else {
           throw new Error("Non-fungible wrapAsset not implemented");
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -156,13 +127,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
    */
   public async unwrapAsset(asset: Asset): Promise<TransactionReceipt> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#unwrapAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         if (instanceOfFungibleAsset(asset)) {
           const fungibleBridgeEndPoint = this
             .bridgeEndPoint as unknown as BridgeLeafFungible;
@@ -178,19 +143,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
 
           this.log.info(`${fnTag}, proof of the asset wrapping: ${receipt}`);
 
-          const parsedReceipt = JSON.parse(receipt);
-
-          attributes.senderAddress = parsedReceipt.from;
-          attributes.receiverAddress = parsedReceipt.to;
-          attributes.internalNetworkTransactionId = response.transactionId;
-          attributes.assetId = asset.id;
-          attributes.operation = "unwrapAsset";
-
-          this.monitorService.updateCounter(
-            "operation_gas_used",
-            parsedReceipt.gas,
-            attributes,
-          );
+          
 
           const proof = await this.bridgeEndPoint.getProof(
             asset,
@@ -204,17 +157,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
         } else {
           throw new Error("Non-fungible unWrapAsset not implemented");
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -227,13 +170,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
    */
   public async lockAsset(asset: Asset): Promise<TransactionReceipt> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#lockAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         if (instanceOfFungibleAsset(asset)) {
           const fungibleBridgeEndPoint = this
             .bridgeEndPoint as unknown as BridgeLeafFungible;
@@ -252,19 +189,6 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
 
           this.log.info(`${fnTag}, proof of the asset wrapping: ${receipt}`);
 
-          const parsedReceipt = JSON.parse(receipt);
-
-          attributes.senderAddress = parsedReceipt.from;
-          attributes.receiverAddress = parsedReceipt.to;
-          attributes.internalNetworkTransactionId = response.transactionId;
-          attributes.assetId = asset.id;
-          attributes.operation = "lockAsset";
-
-          this.monitorService.updateCounter(
-            "operation_gas_used",
-            parsedReceipt.gas,
-            attributes,
-          );
 
           const proof = await this.bridgeEndPoint.getProof(
             asset,
@@ -278,14 +202,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
         } else {
           throw new Error("Non-fungible lockAsset not implemented");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -298,13 +215,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
    */
   public async unlockAsset(asset: Asset): Promise<TransactionReceipt> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#unlockAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         if (instanceOfFungibleAsset(asset)) {
           const fungibleBridgeEndPoint = this
             .bridgeEndPoint as unknown as BridgeLeafFungible;
@@ -323,20 +234,6 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
 
           this.log.info(`${fnTag}, proof of the asset wrapping: ${receipt}`);
 
-          const parsedReceipt = JSON.parse(receipt);
-
-          attributes.senderAddress = parsedReceipt.from;
-          attributes.receiverAddress = parsedReceipt.to;
-          attributes.internalNetworkTransactionId = response.transactionId;
-          attributes.assetId = asset.id;
-          attributes.operation = "unlockAsset";
-
-          this.monitorService.updateCounter(
-            "operation_gas_used",
-            parsedReceipt.gas,
-            attributes,
-          );
-
           const proof = await this.bridgeEndPoint.getProof(
             asset,
             this.claimType,
@@ -349,14 +246,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
         } else {
           throw new Error("Non-fungible unlockAsset not implemented");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -369,13 +259,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
    */
   public async mintAsset(asset: Asset): Promise<TransactionReceipt> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#mintAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         if (instanceOfFungibleAsset(asset)) {
           const fungibleBridgeEndPoint = this
             .bridgeEndPoint as unknown as BridgeLeafFungible;
@@ -394,19 +278,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
 
           this.log.info(`${fnTag}, proof of the asset wrapping: ${receipt}`);
 
-          const parsedReceipt = JSON.parse(receipt);
-
-          attributes.senderAddress = parsedReceipt.from;
-          attributes.receiverAddress = parsedReceipt.to;
-          attributes.internalNetworkTransactionId = response.transactionId;
-          attributes.assetId = asset.id;
-          attributes.operation = "mintAsset";
-
-          this.monitorService.updateCounter(
-            "operation_gas_used",
-            parsedReceipt.gas,
-            attributes,
-          );
+          
 
           const proof = await this.bridgeEndPoint.getProof(
             asset,
@@ -420,14 +292,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
         } else {
           throw new Error("Non-fungible mintAsset not implemented");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -440,13 +305,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
    */
   public async burnAsset(asset: Asset): Promise<TransactionReceipt> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#burnAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         if (instanceOfFungibleAsset(asset)) {
           const fungibleBridgeEndPoint = this
             .bridgeEndPoint as unknown as BridgeLeafFungible;
@@ -465,19 +324,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
 
           this.log.info(`${fnTag}, proof of the asset wrapping: ${receipt}`);
 
-          const parsedReceipt = JSON.parse(receipt);
-
-          attributes.senderAddress = parsedReceipt.from;
-          attributes.receiverAddress = parsedReceipt.to;
-          attributes.internalNetworkTransactionId = response.transactionId;
-          attributes.assetId = asset.id;
-          attributes.operation = "burnAsset";
-
-          this.monitorService.updateCounter(
-            "operation_gas_used",
-            parsedReceipt.gas,
-            attributes,
-          );
+          
 
           const proof = await this.bridgeEndPoint.getProof(
             asset,
@@ -491,14 +338,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
         } else {
           throw new Error("Non-fungible burnAsset not implemented");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -512,13 +352,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
    */
   public async assignAsset(asset: Asset): Promise<TransactionReceipt> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#assignAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      const attributes: Record<
-        string,
-        undefined | string | number | boolean | string[] | number[] | boolean[]
-      > = {};
-      try {
+    
         if (instanceOfFungibleAsset(asset)) {
           const fungibleBridgeEndPoint = this
             .bridgeEndPoint as unknown as BridgeLeafFungible;
@@ -538,20 +372,6 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
 
           this.log.info(`${fnTag}, proof of the asset wrapping: ${receipt}`);
 
-          const parsedReceipt = JSON.parse(receipt);
-
-          attributes.senderAddress = parsedReceipt.from;
-          attributes.receiverAddress = parsedReceipt.to;
-          attributes.internalNetworkTransactionId = response.transactionId;
-          attributes.assetId = asset.id;
-          attributes.operation = "assignAsset";
-
-          this.monitorService.updateCounter(
-            "operation_gas_used",
-            parsedReceipt.gas,
-            attributes,
-          );
-
           const proof = await this.bridgeEndPoint.getProof(
             asset,
             this.claimType,
@@ -564,14 +384,7 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
         } else {
           throw new Error("Non-fungible assignAsset not implemented");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -589,19 +402,10 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
     invocationType: unknown,
   ): Promise<boolean | undefined> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#verifyAssetExistence()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //todo: implement this
         throw new Error("Not implemented");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -619,18 +423,9 @@ export class SATPBridgeExecutionLayerImpl implements SATPBridgeExecutionLayer {
     invocationType: unknown,
   ): Promise<boolean | undefined> {
     const fnTag = `${SATPBridgeExecutionLayerImpl.CLASS_NAME}#verifyLockAsset()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //todo: implement this
         throw new Error("Not implemented");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

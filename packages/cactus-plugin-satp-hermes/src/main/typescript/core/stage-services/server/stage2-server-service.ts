@@ -60,9 +60,7 @@ export class Stage2ServerService extends SATPService {
   ): Promise<void | LockAssertionResponse> {
     const stepTag = `lockAssertionResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.ASSERTION_RECEIPT];
         this.Log.debug(`${fnTag}, lockAssertionResponse...`);
 
@@ -167,14 +165,7 @@ export class Stage2ServerService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async lockAssertionErrorResponse(
@@ -182,9 +173,7 @@ export class Stage2ServerService extends SATPService {
     session?: SATPSession,
   ): Promise<LockAssertionResponse> {
     const fnTag = `${this.getServiceIdentifier()}#lockAssertionErrorResponse()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const errorResponse = create(LockAssertionResponseSchema, {});
         const commonBody = create(CommonSatpSchema, {
           messageType: MessageType.ASSERTION_RECEIPT,
@@ -204,14 +193,7 @@ export class Stage2ServerService extends SATPService {
         errorResponse.serverSignature = messageSignature;
 
         return errorResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkLockAssertionRequest(
@@ -220,9 +202,7 @@ export class Stage2ServerService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkLockAssertionRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkLockAssertionRequest...`);
 
         if (session == undefined) {
@@ -279,13 +259,6 @@ export class Stage2ServerService extends SATPService {
         );
 
         this.Log.info(`${fnTag}, LockAssertionRequest passed all checks.`);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

@@ -51,9 +51,7 @@ export class CrashRecoveryHandler implements SATPHandler {
     req: RecoverRequest,
   ): Promise<RecoverResponse> {
     const fnTag = `${CrashRecoveryHandler.name}#recoverV2MessageImplementation`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag} - Handling RecoverRequest: ${req}`);
         try {
           return await this.serverService.handleRecover(req);
@@ -61,23 +59,14 @@ export class CrashRecoveryHandler implements SATPHandler {
           this.log.error(`${fnTag} - Error:`, error);
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async recoverSuccessImplementation(
     req: RecoverSuccessRequest,
   ): Promise<RecoverSuccessResponse> {
     const fnTag = `${CrashRecoveryHandler.name}#recoverSuccessImplementation`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag} - Handling RecoverSuccessRequest:${req}`);
         try {
           return await this.serverService.handleRecoverSuccess(req);
@@ -85,23 +74,14 @@ export class CrashRecoveryHandler implements SATPHandler {
           this.log.error(`${fnTag} - Error:`, error);
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async rollbackImplementation(
     req: RollbackRequest,
   ): Promise<RollbackResponse> {
     const fnTag = `${CrashRecoveryHandler.name}#rollbackImplementation`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag} - Handling RollbackRequest: ${req}`);
         try {
           return await this.serverService.handleRollback(req);
@@ -109,21 +89,12 @@ export class CrashRecoveryHandler implements SATPHandler {
           this.log.error(`${fnTag} - Error:`, error);
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public setupRouter(router: ConnectRouter): void {
     const fnTag = `${CrashRecoveryHandler.name}#setupRouter`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         // eslint-disable-next-line @typescript-eslint/no-this-alias
         const that = this;
         router.service(CrashRecoveryService, {
@@ -139,14 +110,7 @@ export class CrashRecoveryHandler implements SATPHandler {
         });
 
         this.log.info("Router setup completed for CrashRecoveryHandler");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   // Client-side
@@ -155,9 +119,7 @@ export class CrashRecoveryHandler implements SATPHandler {
     session: SessionData,
   ): Promise<RecoverRequest> {
     const fnTag = `${this.constructor.name}#createRecoverRequest`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         try {
           return this.clientService.createRecoverRequest(session);
         } catch (error) {
@@ -166,23 +128,14 @@ export class CrashRecoveryHandler implements SATPHandler {
           );
           throw new Error(`Error in createRecoverRequest: ${error}`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async sendRecoverSuccessRequest(
     session: SessionData,
   ): Promise<RecoverSuccessRequest> {
     const fnTag = `${this.constructor.name}#createRecoverSuccessRequest`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           return await this.clientService.createRecoverSuccessRequest(session);
         } catch (error) {
@@ -191,14 +144,7 @@ export class CrashRecoveryHandler implements SATPHandler {
           );
           throw new Error(`Error in createRecoverSuccessRequest: ${error}`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async sendRollbackRequest(
@@ -206,9 +152,7 @@ export class CrashRecoveryHandler implements SATPHandler {
     rollbackState: RollbackState,
   ): Promise<RollbackRequest> {
     const fnTag = `${this.constructor.name}#createRollbackRequest`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           return await this.clientService.createRollbackRequest(
             session,
@@ -220,13 +164,6 @@ export class CrashRecoveryHandler implements SATPHandler {
           );
           throw new Error(`Error in createRollbackRequest: ${error}`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

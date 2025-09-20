@@ -150,26 +150,15 @@ export class OracleEVM extends OracleAbstract {
 
   public deployContracts(): Promise<void> {
     const fnTag = `${OracleEVM.CLASS_NAME}#deployContracts`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         // TODO: Implement contract deployment logic
         return Promise.resolve();
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async updateEntry(args: IEVMOracleEntry): Promise<OracleResponse> {
     const fnTag = `${OracleEVM.CLASS_NAME}#updateEntry`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`${fnTag}: Writing data in EVM blockchain}`);
 
         const response = (await this.connector.invokeContract({
@@ -203,21 +192,12 @@ export class OracleEVM extends OracleAbstract {
         transactionResponse.proof = undefined;
 
         return transactionResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async readEntry(args: IEVMOracleEntry): Promise<OracleResponse> {
     const fnTag = `${OracleEVM.CLASS_NAME}#readEntry`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Reading entry with args: ${safeStableStringify(args)}`,
         );
@@ -249,14 +229,7 @@ export class OracleEVM extends OracleAbstract {
           output: response.callOutput,
           proof,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -273,9 +246,7 @@ export class OracleEVM extends OracleAbstract {
     filter?: string[],
   ): Promise<{ unsubscribe: () => void }> {
     const fnTag = `${OracleEVM.CLASS_NAME}#subscribeContractEvent`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Subscribing to event with args: ${safeStableStringify(args)}`,
         );
@@ -325,21 +296,12 @@ export class OracleEVM extends OracleAbstract {
         return {
           unsubscribe: () => subscriber.unsubscribe(),
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public convertOperationToEntry(operation: OracleOperation): IEVMOracleEntry {
     const fnTag = `${OracleEVM.CLASS_NAME}#convertOperationToEntry`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}: Converting operation to entry: ${safeStableStringify(operation)}`,
         );
@@ -369,14 +331,7 @@ export class OracleEVM extends OracleAbstract {
           methodName: contract.methodName,
           params: contract.params!,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -386,9 +341,7 @@ export class OracleEVM extends OracleAbstract {
    */
   private decodedEventToDict(decoded: DecodedParams): Record<string, string> {
     const fnTag = `${OracleEVM.CLASS_NAME}#decodedEventToDict`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const result: Record<string, string> = {};
 
         for (const [key, value] of Object.entries(decoded)) {
@@ -400,13 +353,6 @@ export class OracleEVM extends OracleAbstract {
         }
 
         return result;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

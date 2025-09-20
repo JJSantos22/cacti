@@ -71,9 +71,7 @@ export class Stage1ClientService extends SATPService {
   ): Promise<void | TransferProposalRequest> {
     const stepTag = `transferProposalRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.Log.debug(`${fnTag}, transferProposalRequest...`);
         const messageType = MessageType[MessageType.INIT_PROPOSAL];
         if (session == undefined) {
@@ -277,14 +275,7 @@ export class Stage1ClientService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async transferCommenceRequest(
@@ -293,9 +284,7 @@ export class Stage1ClientService extends SATPService {
   ): Promise<void | TransferCommenceRequest> {
     const stepTag = `transferCommenceRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.TRANSFER_COMMENCE_REQUEST];
         this.Log.debug(`${fnTag}, transferCommenceRequest...`);
 
@@ -399,14 +388,7 @@ export class Stage1ClientService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkPreSATPTransferResponse(
@@ -415,9 +397,7 @@ export class Stage1ClientService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkPreSATPTransferResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkPreSATPTransferResponse...`);
 
         if (session == undefined) {
@@ -489,14 +469,7 @@ export class Stage1ClientService extends SATPService {
         );
 
         this.Log.info(`${fnTag}, PreSATPTransferResponse passed all checks.`);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkTransferProposalResponse(
@@ -505,9 +478,7 @@ export class Stage1ClientService extends SATPService {
   ): Promise<boolean> {
     const stepTag = `checkTransferProposalResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkTransferProposalResponse...`);
 
         if (session == undefined) {
@@ -578,14 +549,7 @@ export class Stage1ClientService extends SATPService {
 
         this.Log.info(`${fnTag}, TransferProposalReceipt passed all checks.`);
         return true;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkProposedTransferClaims(
@@ -593,18 +557,9 @@ export class Stage1ClientService extends SATPService {
     counterTransfer: TransferClaims,
   ): Promise<boolean> {
     const fnTag = `${this.getServiceIdentifier()}#checkCounterTransferClaims()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //todo
         return true;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

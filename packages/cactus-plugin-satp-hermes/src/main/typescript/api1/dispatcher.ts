@@ -132,8 +132,7 @@ export class BLODispatcher {
     this.remoteRepository = options.remoteRepository;
     this.ccManager = options.ccManager;
 
-    context.with(ctx, () => {
-      try {
+    
         const SATPManagerOpts: ISATPManagerOptions = {
           logLevel: this.level,
           ourGateway: ourGateway,
@@ -148,14 +147,7 @@ export class BLODispatcher {
         };
 
         this.manager = new SATPManager(SATPManagerOpts);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public get className(): string {
@@ -164,9 +156,7 @@ export class BLODispatcher {
 
   public async getOrCreateWebServices(): Promise<IWebServiceEndpoint[]> {
     const fnTag = `${BLODispatcher.CLASS_NAME}#getOrCreateWebServices()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           `${fnTag}, Registering webservices on instanceId=${this.instanceId}`,
         );
@@ -254,21 +244,12 @@ export class BLODispatcher {
         this.endpoints = endpoints;
         this.logger.debug(`${fnTag} registered ${endpoints.length} endpoints`);
         return endpoints;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private getTargetGatewayClient(id: string) {
     const fnTag = `${BLODispatcher.CLASS_NAME}#getTargetGatewayClient()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const channels: [string, { toGatewayID: string }][] = Array.from(
           this.orchestrator.getChannels(),
         );
@@ -285,14 +266,7 @@ export class BLODispatcher {
           );
         }
         return filtered[0];
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async healthCheck(): Promise<HealthCheckResponse> {
@@ -325,9 +299,7 @@ export class BLODispatcher {
   public async Transact(req: TransactRequest): Promise<TransactResponse> {
     //TODO pre-verify verify input
     const fnTag = `${BLODispatcher.CLASS_NAME}#transact()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.debug(`Transact request: ${safeStableStringify(req)}`);
 
         if (this.isShuttingDown) {
@@ -343,23 +315,14 @@ export class BLODispatcher {
           this.orchestrator,
         );
         return res;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async GetApproveAddress(
     req: GetApproveAddressRequest,
   ): Promise<GetApproveAddressResponse> {
     const fnTag = `${BLODispatcher.CLASS_NAME}#getApproveAddress()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.info("Get Approve Address request");
         if (!req) {
           throw new Error(`Request is required`);
@@ -394,23 +357,14 @@ export class BLODispatcher {
         return {
           approveAddress: res,
         } as GetApproveAddressResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async AddCounterpartyGateway(
     req: AddCounterpartyGatewayRequest,
   ): Promise<AddCounterpartyGatewayResponse> {
     const fnTag = `${BLODispatcher.CLASS_NAME}#addCounterpartyGateway()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.info("Add Counterparty Gateway request");
         if (!req) {
           throw new Error(`Request is required`);
@@ -455,7 +409,7 @@ export class BLODispatcher {
           );
 
           this.logger.info(`Gateway ${req.counterparty.id} added successfully`);
-          span.setStatus({ code: SpanStatusCode.OK });
+          
           return {
             status: true,
           } as AddCounterpartyGatewayResponse;
@@ -468,14 +422,7 @@ export class BLODispatcher {
             status: false,
           } as AddCounterpartyGatewayResponse;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async PerformAudit(req: AuditRequest): Promise<AuditResponse> {
@@ -497,39 +444,21 @@ export class BLODispatcher {
 
   public async getManager(): Promise<SATPManager> {
     const fnTag = `${BLODispatcher.CLASS_NAME}#getManager()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.info(`Get SATP Manager request`);
         if (!this.manager) {
           throw new Error("SATPManager is not defined");
         }
         return this.manager;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public getOracleManager(): OracleManager {
     const fnTag = `${BLODispatcher.CLASS_NAME}#getManager()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.info(`Get Oracle Manager request`);
         return this.ccManager.getOracleManager();
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async OracleExecuteTask(

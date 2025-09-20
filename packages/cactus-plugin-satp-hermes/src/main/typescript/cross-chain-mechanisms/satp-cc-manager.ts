@@ -80,10 +80,7 @@ export class SATPCrossChainManager {
       this.monitorService,
     );
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         this.bridgeManager = new BridgeManager({
           ontologyOptions: options.ontologyOptions,
           logLevel: this.logLevel,
@@ -98,14 +95,7 @@ export class SATPCrossChainManager {
           initialTasks: [],
           monitorService: this.monitorService,
         });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -118,9 +108,7 @@ export class SATPCrossChainManager {
     config: ICrossChainMechanismsOptions,
   ): Promise<void> {
     const fnTag = `${SATPCrossChainManager.CLASS_NAME}#deployCCMechanisms()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Deploying Cross Chain Mechanisms...`);
 
         if (!config.bridgeConfig && !config.oracleConfig) {
@@ -137,15 +125,8 @@ export class SATPCrossChainManager {
           await this.deployOracleFromConfig(config.oracleConfig);
         }
 
-        span.setStatus({ code: SpanStatusCode.OK });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+        
+      
   }
 
   /**
@@ -158,9 +139,7 @@ export class SATPCrossChainManager {
     bridgesNetworkConfig: INetworkOptions[],
   ): Promise<void> {
     const fnTag = `${SATPCrossChainManager.CLASS_NAME}#deployBridgeFromConfig()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Deploying Bridge...`);
 
         this.log.debug(
@@ -178,15 +157,8 @@ export class SATPCrossChainManager {
           networkIds.push({ ...config.networkIdentification });
         }
         this.gatewayOrchestrator?.addGatewayOwnChannels(networkIds);
-        span.setStatus({ code: SpanStatusCode.OK });
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+        
+      
   }
 
   /**
@@ -199,22 +171,13 @@ export class SATPCrossChainManager {
     bridgesNetworkConfig: INetworkOptions[],
   ): Promise<void> {
     const fnTag = `${SATPCrossChainManager.CLASS_NAME}#deployOracleFromConfig()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Deploying Oracles...`);
 
         for (const config of bridgesNetworkConfig) {
           await this.oracleManager?.deployOracle(config);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**

@@ -59,9 +59,6 @@ export class GatewayPersistence {
 
   public async storeProof(logEntry: GatewayLogEntryPersistence): Promise<void> {
     const fnTag = `${GatewayPersistence.CLASS_NAME}#storeProof()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
         this.log.info(
           `${fnTag} - Storing proof log entry for sessionID: ${logEntry.sessionID}`,
         );
@@ -92,23 +89,15 @@ export class GatewayPersistence {
 
         this.log.debug(`${fnTag} - generated hash: ${hash}`);
         await this.storeRemoteLog(localLog.key, hash);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
+    
   }
 
   public async persistLogEntry(
     logEntry: GatewayLogEntryPersistence,
   ): Promise<void> {
     const fnTag = `${GatewayPersistence.CLASS_NAME}#persistLogEntry()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.info(
           `${fnTag} - Persisting log entry for sessionID: ${logEntry.sessionID}`,
         );
@@ -134,21 +123,12 @@ export class GatewayPersistence {
 
         this.log.debug(`${fnTag} - generated hash: ${hash}`);
         await this.storeRemoteLog(localLog.key, hash);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private getHash(logEntry: LocalLog): string {
     const fnTag = `${GatewayPersistence.CLASS_NAME}#getHash()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(
           `${fnTag} - generating hash for log entry with sessionID: ${logEntry.sessionId}`,
         );
@@ -164,21 +144,12 @@ export class GatewayPersistence {
             "sequenceNumber",
           ]),
         ).toString();
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async storeInDatabase(localLog: LocalLog): Promise<void> {
     const fnTag = `${GatewayPersistence.CLASS_NAME}#storeInDatabase()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.info(`${fnTag} - Storing log entry with key: ${localLog.key}`);
 
         if (this.defaultRepository && !this.localRepository.getCreated()) {
@@ -189,21 +160,12 @@ export class GatewayPersistence {
         }
 
         await this.localRepository.create(localLog);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private async storeRemoteLog(key: string, hash: string): Promise<void> {
     const fnTag = `${GatewayPersistence.CLASS_NAME}#storeRemoteLog()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         if (this.remoteRepository) {
           this.log.info(
             `${fnTag} - Storing remote log with key: ${key} and hash: ${hash}`,
@@ -236,13 +198,6 @@ export class GatewayPersistence {
 
           this.log.info(`${fnTag} - Successfully stored remote log.`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

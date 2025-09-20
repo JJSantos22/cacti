@@ -77,10 +77,7 @@ export class GatewayOrchestrator {
 
     this.logger = LoggerProvider.getOrCreate(logOptions, this.monitorService);
 
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         this.logger.info("Initializing Gateway Connection Manager");
 
         this.crashEnabled = options.enableCrashRecovery ?? false;
@@ -111,14 +108,7 @@ export class GatewayOrchestrator {
             `Gateway Connection Manager connected to ${numberGatewayChannels} gateways.`,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public get ourGateway(): GatewayIdentity {
@@ -153,9 +143,7 @@ export class GatewayOrchestrator {
 
   public startServices(): void {
     const fnTag = `${this.label}#startServices()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         if (!this.expressServer) {
           throw new Error(`${this.label}#startServices() expressServer falsy.`);
         }
@@ -182,17 +170,7 @@ export class GatewayOrchestrator {
             }),
           );
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public addHandlers(handlers: Map<string, SATPHandler>): void {
@@ -278,9 +256,7 @@ export class GatewayOrchestrator {
 
   connectToCounterPartyGateways(): number {
     const fnTag = `${this.label}#connectToCounterPartyGateways()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (!this.counterPartyGateways) {
           this.logger.info(`${fnTag}, No counterparty gateways to connect to`);
           return 0;
@@ -311,17 +287,7 @@ export class GatewayOrchestrator {
           this.logger.error(ex);
         }
         return connected;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   get connectedDLTs(): NetworkId[] {
@@ -331,9 +297,7 @@ export class GatewayOrchestrator {
 
   createChannel(identity: GatewayIdentity): GatewayChannel {
     const fnTag = `${this.label}#createChannel()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (identity.gatewayClientPort === undefined) {
           throw new Error(
             `Gateway ${identity.id} does not have a gatewayClientPort defined`,
@@ -363,17 +327,7 @@ export class GatewayOrchestrator {
           `Created channel to gateway ${identity.id} \n reachable DLTs: ${identity.connectedDLTs}`,
         );
         return channel;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   protected getTargetChannel(id: string): GatewayChannel {
@@ -389,9 +343,7 @@ export class GatewayOrchestrator {
     identity: GatewayIdentity,
   ): Map<string, ConnectClient<SATPServiceInstance>> {
     const fnTag = `${this.label}#createConnectClients()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         // one function for each client type; aggregate in array
         this.logger.debug(
           `Creating clients for gateway ${safeStableStringify(identity)}`,
@@ -461,154 +413,82 @@ export class GatewayOrchestrator {
         }
         // todo perform healthcheck on startup; should be in stage 0
         return clients;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private createStage0ServiceClient(
     transport: ConnectTransport,
   ): ConnectClient<typeof SatpStage0Service> {
     const fnTag = `${this.label}#createStage0ServiceClient()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           "Creating stage 0 service client, with transport: ",
           transport,
         );
         const client = createClient(SatpStage0Service, transport);
         return client;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private createStage1ServiceClient(
     transport: ConnectTransport,
   ): ConnectClient<typeof SatpStage1Service> {
     const fnTag = `${this.label}#createStage1ServiceClient()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           "Creating stage 1 service client, with transport: ",
           transport,
         );
         const client = createClient(SatpStage1Service, transport);
         return client;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private createStage2ServiceClient(
     transport: ConnectTransport,
   ): ConnectClient<typeof SatpStage2Service> {
     const fnTag = `${this.label}#createStage2ServiceClient()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           "Creating stage 2 service client, with transport: ",
           transport,
         );
         const client = createClient(SatpStage2Service, transport);
         return client;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private createStage3ServiceClient(
     transport: ConnectTransport,
   ): ConnectClient<typeof SatpStage3Service> {
     const fnTag = `${this.label}#createStage3ServiceClient()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           "Creating stage 3 service client, with transport: ",
           transport,
         );
         const client = createClient(SatpStage3Service, transport);
         return client;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private createCrashServiceClient(
     transport: ConnectTransport,
   ): ConnectClient<typeof CrashRecoveryService> {
     const fnTag = `${this.label}#createCrashServiceClient()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.debug(
           "Creating crash-manager client, with transport: ",
           transport,
         );
         const client = createClient(CrashRecoveryService, transport);
         return client;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async resolveAndAddGateways(IDs: string[]): Promise<number> {
     const fnTag = `${this.label}#addGateways()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         this.logger.info("Connecting to gateway");
         const gatewaysToAdd: GatewayIdentity[] = [];
@@ -621,24 +501,12 @@ export class GatewayOrchestrator {
 
         this.addGateways(gatewaysToAdd);
         return gatewaysToAdd.length;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public addGateways(gateways: GatewayIdentity[]): string[] {
     const fnTag = `${this.label}#addGateways()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.trace(`Entering ${fnTag}`);
         this.logger.info("Connecting to gateway");
         const addedIDs: string[] = [];
@@ -657,19 +525,8 @@ export class GatewayOrchestrator {
           addedIDs.push(gateway.id);
         }
         this.logger.debug(`Added ${addedIDs.length} gateways: ${addedIDs}`);
-        this.monitorService.updateCounter("gateways", addedIDs.length);
         return addedIDs;
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async addGatewayAndCreateChannel(
@@ -692,7 +549,6 @@ export class GatewayOrchestrator {
     }
     this.channels.set(gateway.id, this.createChannel(gateway));
     this.counterPartyGateways.set(gateway.id, gateway);
-    this.monitorService.updateCounter("gateways");
   }
 
   alreadyConnected(ID: string): boolean {

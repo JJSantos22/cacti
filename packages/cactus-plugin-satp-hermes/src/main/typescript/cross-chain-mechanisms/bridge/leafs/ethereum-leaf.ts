@@ -216,10 +216,7 @@ export class EthereumLeaf
     this.signingCredential = options.signingCredential;
 
     this.gasConfig = options.gasConfig;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         for (const claim of this.claimFormats) {
           switch (claim) {
             case ClaimFormat.BUNGEE:
@@ -262,17 +259,7 @@ export class EthereumLeaf
             `${EthereumLeaf.CLASS_NAME}#constructor, Contract Name or Contract Address missing`,
           );
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -292,9 +279,7 @@ export class EthereumLeaf
    */
   public getApproveAddress(assetType: TokenType): string {
     const fnTag = `${EthereumLeaf.CLASS_NAME}#getApproveAddress`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Getting Approve Address for asset type: ${getEnumKeyByValue(TokenType, assetType)}`,
         );
@@ -318,14 +303,7 @@ export class EthereumLeaf
               `${fnTag}, Invalid asset type: ${getEnumKeyByValue(TokenType, assetType)}`,
             );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -339,21 +317,12 @@ export class EthereumLeaf
    */
   public async deployContracts(): Promise<void> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}#deployContracts`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         await Promise.all([
           this.deployFungibleWrapperContract(),
           // this.deployNonFungibleWrapperContract(),
         ]);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -364,19 +333,10 @@ export class EthereumLeaf
    */
   public getDeployNonFungibleWrapperContractReceipt(): unknown {
     const fnTag = `${EthereumLeaf.CLASS_NAME}#getDeployNonFungibleWrapperContractReceipt`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //TODO implement
         throw new Error("Method not implemented.");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -385,19 +345,10 @@ export class EthereumLeaf
    **/
   public async deployNonFungibleWrapperContract(): Promise<void> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}#deployNonFungibleWrapperContract`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         //TODO implement
         throw new Error("Method not implemented.");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -408,23 +359,14 @@ export class EthereumLeaf
    */
   public getDeployFungibleWrapperContractReceipt(): Web3TransactionReceipt {
     const fnTag = `${EthereumLeaf.CLASS_NAME}#getDeployFungibleWrapperContractReceipt`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (!this.wrapperFungibleDeployReceipt) {
           throw new ReceiptError(
             `${EthereumLeaf.CLASS_NAME}#getDeployFungibleWrapperContractReceipt() Fungible Wrapper Contract Not deployed`,
           );
         }
         return this.wrapperFungibleDeployReceipt;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -440,9 +382,7 @@ export class EthereumLeaf
     contractName?: string,
   ): Promise<void> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}#deployWrapperContract`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Deploying Wrapper Contract`);
 
         if (this.wrapperContractAddress && this.wrapperContractName) {
@@ -486,14 +426,7 @@ export class EthereumLeaf
         this.log.debug(
           `${fnTag}, Wrapper Contract deployed receipt: ${safeStableStringify(deployOutWrapperContract.transactionReceipt)}`,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -505,9 +438,7 @@ export class EthereumLeaf
    */
   public getWrapperContract(type: "FUNGIBLE" | "NONFUNGIBLE"): string {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#getWrapperContract`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Wrapper Contract Adress`);
         switch (type) {
           case "FUNGIBLE":
@@ -523,14 +454,7 @@ export class EthereumLeaf
           default:
             throw new Error("Invalid type");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -543,9 +467,7 @@ export class EthereumLeaf
    */
   public async wrapAsset(asset: EvmAsset): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#wrapAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Wrapping Asset: {${asset.id}, ${asset.owner}, ${asset.contractAddress}, ${asset.type}}`,
         );
@@ -594,14 +516,7 @@ export class EthereumLeaf
           transactionReceipt:
             safeStableStringify(response.out.transactionReceipt) ?? "",
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -614,9 +529,7 @@ export class EthereumLeaf
    */
   public async unwrapAsset(assetId: string): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#unwrapAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Unwrapping Asset: ${assetId}`);
 
         if (!this.wrapperContractName || !this.wrapperContractAddress) {
@@ -648,14 +561,7 @@ export class EthereumLeaf
           transactionReceipt:
             safeStableStringify(response.out.transactionReceipt) ?? "",
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -672,9 +578,7 @@ export class EthereumLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#lockAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Locking Asset: ${assetId} amount: ${amount}`);
 
         if (!this.wrapperContractName || !this.wrapperContractAddress) {
@@ -707,14 +611,7 @@ export class EthereumLeaf
           transactionReceipt:
             safeStableStringify(response.out.transactionReceipt) ?? "",
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -731,9 +628,7 @@ export class EthereumLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#unlockAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Unlocking Asset: ${assetId} amount: ${amount}`,
         );
@@ -767,14 +662,7 @@ export class EthereumLeaf
           transactionReceipt:
             safeStableStringify(response.out.transactionReceipt) ?? "",
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -791,9 +679,7 @@ export class EthereumLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#mintAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Minting Asset: ${assetId} amount: ${amount}`);
 
         if (!this.wrapperContractName || !this.wrapperContractAddress) {
@@ -825,14 +711,7 @@ export class EthereumLeaf
           transactionReceipt:
             safeStableStringify(response.out.transactionReceipt) ?? "",
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -849,9 +728,7 @@ export class EthereumLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#burnAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Burning Asset: ${assetId} amount: ${amount}`);
 
         if (!this.wrapperContractName || !this.wrapperContractAddress) {
@@ -883,14 +760,7 @@ export class EthereumLeaf
           transactionReceipt:
             safeStableStringify(response.out.transactionReceipt) ?? "",
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -909,9 +779,7 @@ export class EthereumLeaf
     amount: number,
   ): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#assignAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Assigning Asset: ${assetId} amount: ${amount} to: ${to}`,
         );
@@ -945,14 +813,7 @@ export class EthereumLeaf
           transactionReceipt:
             safeStableStringify(response.out.transactionReceipt) ?? "",
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -964,9 +825,7 @@ export class EthereumLeaf
    */
   public async getAssets(): Promise<string[]> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#getAssets`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Assets`);
 
         if (!this.wrapperContractName || !this.wrapperContractAddress) {
@@ -996,14 +855,7 @@ export class EthereumLeaf
         }
 
         return response.callOutput as string[];
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1016,9 +868,7 @@ export class EthereumLeaf
    */
   public async getAsset(assetId: string): Promise<EvmAsset> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#getAsset`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting Asset`);
 
         if (!this.wrapperContractName || !this.wrapperContractAddress) {
@@ -1059,14 +909,7 @@ export class EthereumLeaf
           amount: token.amount,
           network: this.networkIdentification,
         } as EvmAsset;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1085,9 +928,7 @@ export class EthereumLeaf
     invocationType: EthContractInvocationType,
   ): Promise<TransactionResponse> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#runTransaction`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Running Transaction: ${methodName} with params: ${params}`,
         );
@@ -1124,14 +965,7 @@ export class EthereumLeaf
             safeStableStringify(response.out.transactionReceipt) ?? "",
           output: response.callOutput ?? undefined,
         };
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1145,9 +979,7 @@ export class EthereumLeaf
    */
   public async getView(assetId: string): Promise<string> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#getView`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(`${fnTag}, Getting View for asset: ${assetId}`);
 
         if (!this.wrapperContractName || !this.wrapperContractAddress) {
@@ -1186,14 +1018,7 @@ export class EthereumLeaf
         }
 
         return safeStableStringify(generated);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1204,9 +1029,7 @@ export class EthereumLeaf
    */
   public async getReceipt(transactionId: string): Promise<string> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#getReceipt`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Getting Receipt: transactionId: ${transactionId}`,
         );
@@ -1219,14 +1042,7 @@ export class EthereumLeaf
           await this.connector.invokeRawWeb3EthMethod(getTransactionReq);
 
         return safeStableStringify(receipt) ?? "";
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -1242,9 +1058,7 @@ export class EthereumLeaf
     claimFormat: ClaimFormat,
   ): Promise<string> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}}#runTransaction`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         this.log.debug(
           `${fnTag}, Getting Proof of asset: ${asset.id} with a format of: ${claimFormat}`,
         );
@@ -1261,21 +1075,12 @@ export class EthereumLeaf
           default:
             throw new ProofError(`Claim format not supported: ${claimFormat}`);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async shutdownConnection(): Promise<void> {
     const fnTag = `${EthereumLeaf.CLASS_NAME}#shutdownConnection`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, async () => {
-      try {
+    
         try {
           await this.connector.shutdown();
           this.log.debug(
@@ -1287,14 +1092,7 @@ export class EthereumLeaf
           );
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   private isFullPluginOptions = (

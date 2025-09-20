@@ -98,9 +98,7 @@ export class Stage3ServerService extends SATPService {
   ): Promise<void | CommitPreparationResponse> {
     const stepTag = `commitReady()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.COMMIT_READY];
         this.Log.debug(`${fnTag}, commitReady...`);
 
@@ -211,14 +209,7 @@ export class Stage3ServerService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async commitReadyErrorResponse(
@@ -226,9 +217,7 @@ export class Stage3ServerService extends SATPService {
     session?: SATPSession,
   ): Promise<CommitPreparationResponse> {
     const fnTag = `${this.getServiceIdentifier()}#commitReadyErrorResponse()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const errorResponse = create(CommitPreparationResponseSchema, {});
         const commonBody = create(CommonSatpSchema, {
           messageType: MessageType.COMMIT_READY,
@@ -248,14 +237,7 @@ export class Stage3ServerService extends SATPService {
         errorResponse.serverSignature = messageSignature;
 
         return errorResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async commitFinalAcknowledgementReceiptResponse(
@@ -264,9 +246,7 @@ export class Stage3ServerService extends SATPService {
   ): Promise<void | CommitFinalAssertionResponse> {
     const stepTag = `commitFinalAcknowledgementReceiptResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType = MessageType[MessageType.ACK_COMMIT_FINAL];
         this.Log.debug(
           `${fnTag}, commitFinalAcknowledgementReceiptResponse...`,
@@ -395,14 +375,7 @@ export class Stage3ServerService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async commitFinalAcknowledgementReceiptErrorResponse(
@@ -410,9 +383,7 @@ export class Stage3ServerService extends SATPService {
     session?: SATPSession,
   ): Promise<CommitFinalAssertionResponse> {
     const fnTag = `${this.getServiceIdentifier()}#commitFinalAcknowledgementReceiptErrorResponse()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const errorResponse = create(CommitFinalAssertionResponseSchema, {});
         const commonBody = create(CommonSatpSchema, {
           messageType: MessageType.ACK_COMMIT_FINAL,
@@ -432,14 +403,7 @@ export class Stage3ServerService extends SATPService {
         errorResponse.serverSignature = messageSignature;
 
         return errorResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkCommitPreparationRequest(
@@ -448,9 +412,7 @@ export class Stage3ServerService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkCommitPreparationRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkCommitPreparationRequest...`);
 
         if (session == undefined) {
@@ -491,14 +453,7 @@ export class Stage3ServerService extends SATPService {
         );
 
         this.Log.info(`${fnTag}, CommitPreparationRequest passed all checks.`);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkCommitFinalAssertionRequest(
@@ -507,9 +462,7 @@ export class Stage3ServerService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkCommitFinalAssertionRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkCommitFinalAssertionRequest...`);
 
         if (session == undefined) {
@@ -567,14 +520,7 @@ export class Stage3ServerService extends SATPService {
         this.Log.info(
           `${fnTag}, CommitFinalAssertionRequest passed all checks.`,
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async checkTransferCompleteRequest(
@@ -583,9 +529,7 @@ export class Stage3ServerService extends SATPService {
   ): Promise<void> {
     const stepTag = `checkTransferCompleteRequest()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, () => {
-      try {
+    
         this.Log.debug(`${fnTag}, checkTransferCompleteRequest...`);
 
         if (session == undefined) {
@@ -633,14 +577,7 @@ export class Stage3ServerService extends SATPService {
         );
 
         this.Log.info(`${fnTag}, TransferCompleteRequest passed all checks.`);
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async transferCompleteResponse(
@@ -649,9 +586,7 @@ export class Stage3ServerService extends SATPService {
   ): Promise<TransferCompleteResponse> {
     const stepTag = `createTransferCompleteResponse()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         const messageType =
           MessageType[MessageType.COMMIT_TRANSFER_COMPLETE_RESPONSE];
         this.Log.debug(`${fnTag}, createTransferCompleteResponse...`);
@@ -762,14 +697,7 @@ export class Stage3ServerService extends SATPService {
           });
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async transferCompleteErrorResponse(
@@ -777,9 +705,7 @@ export class Stage3ServerService extends SATPService {
     session?: SATPSession,
   ): Promise<TransferCompleteResponse> {
     const fnTag = `${this.getServiceIdentifier()}#transferCompleteErrorResponse()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const errorResponse = create(TransferCompleteResponseSchema, {});
         const commonBody = create(CommonSatpSchema, {
           messageType: MessageType.COMMIT_TRANSFER_COMPLETE_RESPONSE,
@@ -799,22 +725,13 @@ export class Stage3ServerService extends SATPService {
         errorResponse.serverSignature = messageSignature;
 
         return errorResponse;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async mintAsset(session: SATPSession): Promise<void> {
     const stepTag = `mintAsset()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         if (session == undefined) {
           throw new SessionError(fnTag);
         }
@@ -911,22 +828,13 @@ export class Stage3ServerService extends SATPService {
           });
           throw new FailedToProcessError(fnTag, "MintAsset", error);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   async assignAsset(session: SATPSession): Promise<void> {
     const stepTag = `assignAsset()`;
     const fnTag = `${this.getServiceIdentifier()}#${stepTag}`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    await context.with(ctx, async () => {
-      try {
+    
         if (session == undefined) {
           throw new SessionError(fnTag);
         }
@@ -1030,13 +938,6 @@ export class Stage3ServerService extends SATPService {
           });
           throw new FailedToProcessError(fnTag, "AssignAsset", error);
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

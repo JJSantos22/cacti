@@ -115,9 +115,7 @@ export class SATPSession {
 
   private initialize(sessionData: SessionData): void {
     const fnTag = `${SATPSession.CLASS_NAME}#initialize()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         sessionData.hashes = create(MessageStagesHashesSchema, {});
         sessionData.signatures = create(MessageStagesSignaturesSchema, {});
         sessionData.processedTimestamps = create(
@@ -180,36 +178,19 @@ export class SATPSession {
         sessionData.satpMessages.stage3 = create(Stage3MessagesSchema, {});
         sessionData.state = State.ONGOING;
 
-        this.monitorService.updateCounter("created_sessions");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public getServerSessionData(): SessionData {
     const fnTag = `${SATPSession.CLASS_NAME}#getServerSessionData()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (this.serverSessionData == undefined) {
           throw new Error(
             `${SATPSession.CLASS_NAME}#getServerSessionData(), serverSessionData is undefined`,
           );
         }
         return this.serverSessionData;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public get className(): string {
@@ -218,23 +199,14 @@ export class SATPSession {
 
   public getClientSessionData(): SessionData {
     const fnTag = `${SATPSession.CLASS_NAME}#getClientSessionData()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         if (this.clientSessionData == undefined) {
           throw new Error(
             `${SATPSession.CLASS_NAME}#getClientSessionData(), clientSessionData is undefined`,
           );
         }
         return this.clientSessionData;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public static recreateSession(
@@ -242,9 +214,6 @@ export class SATPSession {
     monitorService: MonitorService,
   ): SATPSession {
     const fnTag = `${SATPSession.CLASS_NAME}#recreateSession()`;
-    const { span, context: ctx } = monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
         const isClient = sessionData.role === Type.CLIENT;
         const isServer = sessionData.role === Type.SERVER;
 
@@ -269,14 +238,7 @@ export class SATPSession {
         }
 
         return session;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public createSessionData(
@@ -285,9 +247,7 @@ export class SATPSession {
     contextId: string,
   ): void {
     const fnTag = `${SATPSession.CLASS_NAME}#createSessionData()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         if (type == SessionType.SERVER) {
           if (this.serverSessionData !== undefined) {
             throw new Error(
@@ -321,14 +281,7 @@ export class SATPSession {
             this.clientSessionData = sessionData;
             break;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public hasServerSessionData(): boolean {
@@ -347,9 +300,7 @@ export class SATPSession {
 
   public getSessionState(): State {
     const fnTag = `${SATPSession.CLASS_NAME}#getSessionState()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.logger.info("serverSessionId: ", this.serverSessionData?.state);
         this.logger.info("clientSessionId: ", this.clientSessionData?.state);
         return (
@@ -357,14 +308,7 @@ export class SATPSession {
           this.clientSessionData?.state ||
           State.UNSPECIFIED
         );
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public verify(
@@ -375,9 +319,7 @@ export class SATPSession {
     stage0?: boolean,
   ): void {
     const fnTag = `${SATPSession.CLASS_NAME}#verify()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    context.with(ctx, () => {
-      try {
+    
         let sessionData: SessionData | undefined;
         try {
           if (type == SessionType.SERVER) {
@@ -470,14 +412,7 @@ export class SATPSession {
             error,
           );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public toString(): string {

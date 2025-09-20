@@ -38,9 +38,7 @@ export class RollbackStrategyFactory {
 
   createStrategy(sessionData: SessionData): RollbackStrategy {
     const fnTag = "RollbackStrategyFactory#createStrategy";
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         const satpPhase = getCrashedStage(sessionData);
 
         this.log.debug(
@@ -76,13 +74,6 @@ export class RollbackStrategyFactory {
             this.log.debug(`${fnTag} All stages completed; no rollback needed`);
             throw new Error("No rollback needed as all stages are complete.");
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

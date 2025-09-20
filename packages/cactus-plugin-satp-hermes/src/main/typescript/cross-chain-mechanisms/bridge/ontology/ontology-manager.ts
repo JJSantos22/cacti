@@ -63,10 +63,7 @@ export class OntologyManager {
       { label, level: this.logLevel },
       monitorService,
     );
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-
-    context.with(ctx, () => {
-      try {
+    
         const ontologiesPath = options.ontologiesPath;
 
         if (ontologiesPath) {
@@ -105,17 +102,7 @@ export class OntologyManager {
             "Ontologies path not provided. Ontologies must be added manually.",
           );
         }
-      } catch (error) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String(error),
-        });
-        span.recordException(error);
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -128,9 +115,7 @@ export class OntologyManager {
   public getOntology(ledgerType: LedgerType, tokenId: string): string {
     //TODO: Add support for ontologies of standard tokens e.g. ERC20, ERC721... They should use the same ontology and have an different id.
     const fnTag = `${OntologyManager.CLASS_NAME}#getOntology()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.info("Retrieving ontology...");
         const ledgerOntologies = this.ontologies.get(ledgerType);
         if (!ledgerOntologies) {
@@ -148,14 +133,7 @@ export class OntologyManager {
           `${fnTag}, Retrieved ontology for ledger: ${ledgerType}, id: ${tokenId}`,
         );
         return ontology;
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -164,18 +142,9 @@ export class OntologyManager {
    */
   public addOntology(): void {
     const fnTag = `${OntologyManager.CLASS_NAME}#addOntology()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         throw new Error("Method not implemented.");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -184,18 +153,9 @@ export class OntologyManager {
    */
   public removeOntology(): void {
     const fnTag = `${OntologyManager.CLASS_NAME}#removeOntology()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         throw new Error("Method not implemented.");
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -206,18 +166,9 @@ export class OntologyManager {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private checkOntology(ontology: string): void {
     const fnTag = `${OntologyManager.CLASS_NAME}#checkOntology()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         //TODO: implement
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   /**
@@ -232,9 +183,7 @@ export class OntologyManager {
     id: string,
   ): FabricInteractionSignature[] | EvmInteractionSignature[] {
     const fnTag = `${OntologyManager.CLASS_NAME}#getOntologyInteractions()`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         this.log.info(`${fnTag}, Getting ontology interactions...`);
         const ontology = this.getOntology(ledgerType, id);
 
@@ -251,13 +200,6 @@ export class OntologyManager {
               `${fnTag}, Ledger ${ledgerType} not supported`,
             );
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }

@@ -39,9 +39,7 @@ export class CrashRecoveryServerService {
 
   public async handleRecover(req: RecoverRequest): Promise<RecoverResponse> {
     const fnTag = `${CrashRecoveryServerService.name}#handleRecover`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           this.log.debug(`${fnTag} - Handling RecoverRequest:`, req.sessionId);
 
@@ -100,23 +98,14 @@ export class CrashRecoveryServerService {
           this.log.error(`${fnTag} - Error handling RecoverRequest: ${error}`);
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async handleRecoverSuccess(
     req: RecoverSuccessRequest,
   ): Promise<RecoverSuccessResponse> {
     const fnTag = `${CrashRecoveryServerService.name}#handleRecoverSuccess`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, () => {
-      try {
+    
         try {
           this.log.debug(
             `${fnTag} - Handling RecoverSuccessRequest:`,
@@ -171,21 +160,12 @@ export class CrashRecoveryServerService {
           );
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 
   public async handleRollback(req: RollbackRequest): Promise<RollbackResponse> {
     const fnTag = `${CrashRecoveryServerService.name}#handleRollback`;
-    const { span, context: ctx } = this.monitorService.startSpan(fnTag);
-    return context.with(ctx, async () => {
-      try {
+    
         try {
           this.log.debug(`${fnTag} - Handling RollbackRequest:`, req.sessionId);
 
@@ -245,13 +225,6 @@ export class CrashRecoveryServerService {
           this.log.error(`${fnTag} - Error handling RollbackRequest: ${error}`);
           throw error;
         }
-      } catch (err) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-        span.recordException(err);
-        throw err;
-      } finally {
-        span.end();
-      }
-    });
+      
   }
 }
