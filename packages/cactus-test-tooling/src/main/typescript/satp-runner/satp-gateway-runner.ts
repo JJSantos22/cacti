@@ -27,6 +27,8 @@ export interface ISATPGatewayRunnerConstructorOptions {
   ontologiesPath?: string;
   networkName?: string;
   url?: string; // URL for the SATP gateway
+  otelExporterOtlpEndpoint?: string;
+  otelServiceName?: string;
 }
 
 export const SATP_GATEWAY_RUNNER_DEFAULT_OPTIONS = Object.freeze({
@@ -69,6 +71,8 @@ export class SATPGatewayRunner implements ITestLedger {
   public readonly ontologiesPath?: string;
   private readonly networkName?: string;
   private readonly url?: string;
+  private readonly otelExporterOtlpEndpoint: string;
+  private readonly otelServiceName: string;
 
   private readonly log: Logger;
   private container: Container | undefined;
@@ -94,6 +98,9 @@ export class SATPGatewayRunner implements ITestLedger {
       options.oapiPort || SATP_GATEWAY_RUNNER_DEFAULT_OPTIONS.oapiPort;
     this.networkName = options.networkName;
     this.url = options.url;
+    this.otelExporterOtlpEndpoint =
+      options.otelExporterOtlpEndpoint || "http://otel-lgtm:4318";
+    this.otelServiceName = options.otelServiceName || "satp-gateway";
 
     this.configPath = options.configPath;
     this.logsPath = options.logsPath;
@@ -229,8 +236,8 @@ export class SATPGatewayRunner implements ITestLedger {
 
     const createOptions: ContainerCreateOptions = {
       Env: [
-        "OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-lgtm:4318",
-        "OTEL_SERVICE_NAME=satp-gateway",
+        `OTEL_EXPORTER_OTLP_ENDPOINT=${this.otelExporterOtlpEndpoint}`,
+        `OTEL_SERVICE_NAME=${this.otelServiceName}`,
       ],
       ExposedPorts: {
         [`${SATP_GATEWAY_RUNNER_DEFAULT_OPTIONS.serverPort}/tcp`]: {}, // SERVER_PORT

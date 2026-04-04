@@ -188,6 +188,8 @@ export class CbdcBridgingAppDummyInfrastructure {
       await this.db_local2?.remove();
       await this.db_remote2?.stop();
       await this.db_remote2?.remove();
+      await this.monitorService?.stop();
+      await this.monitorService?.remove();
 
       await Promise.all([
         this.besuEnvironment.tearDown(),

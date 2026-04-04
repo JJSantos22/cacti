@@ -4,6 +4,7 @@ import { EventEmitter } from "events";
 
 export interface MonitorSystemConfig {
   network?: string;
+  networkAlias?: string;
   grafanaPort?: number;
   httpPort?: number;
   grpcPort?: number;
@@ -15,6 +16,7 @@ export async function createMonitorSystem(
 ): Promise<Container> {
   const {
     network = "CDBC_Network",
+    networkAlias = "otel-lgtm",
     grafanaPort = 3000,
     httpPort = 4318,
     grpcPort = 4317,
@@ -57,13 +59,23 @@ export async function createMonitorSystem(
   const healthCheck = {
     test: [
       "CMD-SHELL",
-      `curl -sf http://localhost:${grafanaPort}/api/health | grep -q '"database": "ok"' || exit 1`,
+      `curl -sf http://localhost:3000/api/health | grep -q '"database": "ok"' || exit 1`,
     ],
     interval: 1000000,
     timeout: 60000000,
     retries: 30,
     startPeriod: 1000000,
   };
+
+  const networkingConfig = network
+    ? {
+        EndpointsConfig: {
+          [network]: {
+            Aliases: [networkAlias],
+          },
+        },
+      }
+    : undefined;
 
   const container = new Promise<Container>((resolve, reject) => {
     const eventEmitter: EventEmitter = docker.run(
@@ -77,11 +89,12 @@ export async function createMonitorSystem(
           "4318/tcp": [{ HostPort: String(httpPort) }],
         },
         ExposedPorts: {
-          [`${grafanaPort}/tcp`]: {},
-          [`${grpcPort}/tcp`]: {},
-          [`${httpPort}/tcp`]: {},
+          "3000/tcp": {},
+          "4317/tcp": {},
+          "4318/tcp": {},
         },
         HostConfig: hostConfig,
+        NetworkingConfig: networkingConfig,
         Healthcheck: healthCheck,
         Env: [
           `OTEL_METRIC_EXPORT_INTERVAL=${exportInterval}`,
