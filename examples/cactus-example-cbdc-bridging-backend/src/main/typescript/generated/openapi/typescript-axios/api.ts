@@ -249,8 +249,8 @@ export interface TransactRequestSourceChain {
 }
 
 export const TransactRequestSourceChainAssetTypeEnum = {
-    Fabric: 'FABRIC',
-    Besu: 'BESU'
+    BesuA: 'BESU_A',
+    BesuB: 'BESU_B'
 } as const;
 
 export type TransactRequestSourceChainAssetTypeEnum = typeof TransactRequestSourceChainAssetTypeEnum[keyof typeof TransactRequestSourceChainAssetTypeEnum];
@@ -522,8 +522,8 @@ export class GetAmountApprovedApi extends BaseAPI {
  * @export
  */
 export const GetAmountApprovedChainEnum = {
-    Fabric: 'FABRIC',
-    Besu: 'BESU'
+    BesuA: 'BESU_A',
+    BesuB: 'BESU_B'
 } as const;
 export type GetAmountApprovedChainEnum = typeof GetAmountApprovedChainEnum[keyof typeof GetAmountApprovedChainEnum];
 
@@ -643,8 +643,8 @@ export class GetBalanceApi extends BaseAPI {
  * @export
  */
 export const GetBalanceChainEnum = {
-    Fabric: 'FABRIC',
-    Besu: 'BESU'
+    BesuA: 'BESU_A',
+    BesuB: 'BESU_B'
 } as const;
 export type GetBalanceChainEnum = typeof GetBalanceChainEnum[keyof typeof GetBalanceChainEnum];
 
@@ -760,8 +760,8 @@ export class GetSessionsReferencesApi extends BaseAPI {
  * @export
  */
 export const GetSessionsReferencesLedgerEnum = {
-    Fabric: 'FABRIC',
-    Besu: 'BESU'
+    BesuA: 'BESU_A',
+    BesuB: 'BESU_B'
 } as const;
 export type GetSessionsReferencesLedgerEnum = typeof GetSessionsReferencesLedgerEnum[keyof typeof GetSessionsReferencesLedgerEnum];
 
@@ -1093,6 +1093,5 @@ export class TransferApi extends BaseAPI {
         return TransferApiFp(this.configuration).transfer(transferRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
-
 
 

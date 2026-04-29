@@ -15,7 +15,7 @@ import {
 import { registerWebServiceEndpoint } from "@hyperledger/cactus-core";
 
 import OAS from "../../json/openapi-bundled.json";
-import { IRequestOptions } from "../types";
+import { IRequestOptions, LedgerId } from "../types";
 
 export class GetSessionsDataEndpointV1 implements IWebServiceEndpoint {
   public static readonly CLASS_NAME = "GetSessionsDataEndpointV1EndpointV1";
@@ -86,7 +86,7 @@ export class GetSessionsDataEndpointV1 implements IWebServiceEndpoint {
     this.log.debug(reqTag);
     try {
       const result = await this.options.infrastructure.getSessionsData(
-        req.query.Ledger as string,
+        req.query.Ledger as LedgerId,
       );
       res.status(200).json(result);
     } catch (ex) {

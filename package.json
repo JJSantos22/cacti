@@ -53,7 +53,7 @@
     "start:api-server": "yarn node ./packages/cactus-cmd-api-server/dist/lib/main/typescript/cmd/cactus-api.js --config-file=.config.json",
     "start:example-supply-chain": "yarn build:dev && cd ./examples/cactus-example-supply-chain-backend/ && yarn start",
     "start:example-carbon-accounting": "CONFIG_FILE=examples/cactus-example-carbon-accounting-backend/example-config.json node examples/cactus-example-carbon-accounting-backend/dist/lib/main/typescript/carbon-accounting-app-cli.js",
-    "start:example-cbdc-bridging-app": "node -r ts-node/register examples/cactus-example-cbdc-bridging-backend/dist/lib/main/typescript/cbdc-bridging-app-cli.js dotenv_config_path=examples/cactus-example-cbdc-bridging-backend/process.env",
+    "start:example-cbdc-bridging-app": "node -r ts-node/register examples/cactus-example-cbdc-bridging-backend/src/main/typescript/cbdc-bridging-app-cli.ts dotenv_config_path=examples/cactus-example-cbdc-bridging-backend/process.env",
     "start:example-cbdc-frontend": "cd ./examples/cactus-example-cbdc-bridging-frontend/ && yarn start",
     "start:example-cbdc": "run-p start:example-cbdc-bridging-app start:example-cbdc-frontend",
     "purge-build-cache": "del-cli .build-cache/*",

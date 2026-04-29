@@ -1,4 +1,4 @@
-# Hyperledger Cactus Example - CBDC Bridging between Fabric and Besu
+# Hyperledger Cactus Example - CBDC Bridging between Besu and Besu
 
 ## Running the backend
 

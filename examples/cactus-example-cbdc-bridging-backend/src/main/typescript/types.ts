@@ -1,6 +1,8 @@
 import { LogLevelDesc } from "@hyperledger/cactus-common";
 import { CbdcBridgingAppDummyInfrastructure } from "./infrastructure/cbdc-bridging-app-dummy-infrastructure";
 
+export type LedgerId = "BESU_A" | "BESU_B";
+
 export interface IRequestOptions {
   logLevel?: LogLevelDesc;
   infrastructure: CbdcBridgingAppDummyInfrastructure;

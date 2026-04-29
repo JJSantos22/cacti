@@ -54,8 +54,8 @@ paths:
                     assetType:
                       type: string
                       enum:
-                        - FABRIC
-                        - BESU
+                        - BESU_A
+                        - BESU_B
                 receiverChain:
                   description: Enum for the type of asset being transferred.
                   type: object
@@ -63,8 +63,8 @@ paths:
                     assetType:
                       type: string
                       enum:
-                        - FABRIC
-                        - BESU
+                        - BESU_A
+                        - BESU_B
                 amount:
                   type: string
                   example: '100'
@@ -150,8 +150,8 @@ paths:
           schema:
             type: string
             enum:
-              - FABRIC
-              - BESU
+              - BESU_A
+              - BESU_B
           description: Unique identifier for the session.
       responses:
         '200':
@@ -203,8 +203,8 @@ paths:
           schema:
             type: string
             enum:
-              - FABRIC
-              - BESU
+              - BESU_A
+              - BESU_B
       responses:
         '200':
           description: OK
@@ -257,8 +257,8 @@ paths:
                     assetType:
                       type: string
                       enum:
-                        - FABRIC
-                        - BESU
+                        - BESU_A
+                        - BESU_B
               required:
                 - user
                 - amount
@@ -341,8 +341,8 @@ paths:
                     assetType:
                       type: string
                       enum:
-                        - FABRIC
-                        - BESU
+                        - BESU_A
+                        - BESU_B
               required:
                 - user
                 - amount
@@ -414,8 +414,8 @@ paths:
           schema:
             type: string
             enum:
-              - FABRIC
-              - BESU
+              - BESU_A
+              - BESU_B
       responses:
         '200':
           description: OK
@@ -462,8 +462,8 @@ paths:
                     assetType:
                       type: string
                       enum:
-                        - FABRIC
-                        - BESU
+                        - BESU_A
+                        - BESU_B
                 receiverChain:
                   description: Enum for the type of asset being transferred.
                   type: object
@@ -471,8 +471,8 @@ paths:
                     assetType:
                       type: string
                       enum:
-                        - FABRIC
-                        - BESU
+                        - BESU_A
+                        - BESU_B
                 amount:
                   type: string
                   example: '100'

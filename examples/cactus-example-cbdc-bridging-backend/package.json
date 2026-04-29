@@ -1,12 +1,11 @@
 {
   "name": "@hyperledger/cactus-example-cbdc-bridging-backend",
   "version": "2.1.0",
-  "description": "An example application showing how to use Cacti when implementing a CBDC bridging application between Hyperledger Fabric and Hyperledger Besu.",
+  "description": "An example application showing how to use Cacti when implementing a CBDC bridging application between two Hyperledger Besu ledgers.",
   "keywords": [
     "Hyperledger",
     "Cacti",
     "SATP",
-    "Fabric",
     "Besu",
     "Blockchain",
     "CBDC"

@@ -16,7 +16,7 @@ import {
   handleRestEndpointException,
   registerWebServiceEndpoint,
 } from "@hyperledger/cactus-core";
-import { TransactRequestSourceChainAssetTypeEnum } from "../generated/openapi/typescript-axios/api";
+import { LedgerId } from "../types";
 
 export class GetAmountApprovedEndpointV1 implements IWebServiceEndpoint {
   public static readonly CLASS_NAME = "GetAmountApprovedEndpointV1";
@@ -79,16 +79,10 @@ export class GetAmountApprovedEndpointV1 implements IWebServiceEndpoint {
     const reqTag = `${this.getVerbLowerCase()} - ${this.getPath()}`;
     this.log.debug(reqTag);
     try {
-      let result;
-      if (req.query.chain === TransactRequestSourceChainAssetTypeEnum.Besu) {
-        result = await this.options.infrastructure
-          .getBesuEnvironment()
-          .getAmountApprovedBesu(req.query.user as string);
-      } else {
-        result = await this.options.infrastructure
-          .getFabricEnvironment()
-          .getAmountApprovedFabric(req.query.user as string);
-      }
+      const result = await this.options.infrastructure.getAmountApproved(
+        req.query.chain as LedgerId,
+        req.query.user as string,
+      );
       res.status(200).json(result);
     } catch (ex) {
       const errorMsg = `${reqTag} ${fnTag} Failed to transact:`;

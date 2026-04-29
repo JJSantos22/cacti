@@ -31,7 +31,7 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
 
   useEffect(() => {
     async function fetchData() {
-      if (props.ledger !== "FABRIC" && props.ledger !== "BESU") {
+      if (props.ledger !== "BESU_A" && props.ledger !== "BESU_B") {
         setErrorMessage("Invalid ledger");
         return;
       }
@@ -98,16 +98,6 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
           )}
           {props.user === "Bridge" ? (
             <Grid item xs={12} lg={12}></Grid>
-          ) : props.ledger === "Besu" ? (
-            <Grid item xs={12} lg={6}>
-              <NormalButton
-                variant="contained"
-                disabled={amount <= 0}
-                onClick={() => setTransferDialog(true)}
-              >
-                Transfer
-              </NormalButton>
-            </Grid>
           ) : (
             <Grid item xs={12} lg={6}>
               <NormalButton
@@ -141,12 +131,7 @@ export default function ActionsContainer(props: IActionsContainerOptions) {
               </CriticalButton>
             </Grid>
           )}
-          {props.ledger === "Fabric" && props.user !== "Bridge" && (
-            <Grid item xs={12} lg={6}></Grid>
-          )}
-          {props.ledger === "Besu" && props.user !== "Bridge" && (
-            <Grid item xs={12} lg={6}></Grid>
-          )}
+          {props.user !== "Bridge" && <Grid item xs={12} lg={6}></Grid>}
         </Grid>
       )}
       <MintDialog

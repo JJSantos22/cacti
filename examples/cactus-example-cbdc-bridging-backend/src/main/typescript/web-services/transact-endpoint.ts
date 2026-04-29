@@ -17,6 +17,7 @@ import {
   registerWebServiceEndpoint,
 } from "@hyperledger/cactus-core";
 import { TransactRequest } from "../generated/openapi/typescript-axios/api";
+import { LedgerId } from "../types";
 
 export class TransactEndpointV1 implements IWebServiceEndpoint {
   public static readonly CLASS_NAME = "TransactEndpointV1";
@@ -81,8 +82,8 @@ export class TransactEndpointV1 implements IWebServiceEndpoint {
       const result = await this.options.infrastructure.bridgeTokens(
         reqBody.sender,
         reqBody.receiver,
-        reqBody.sourceChain.assetType!,
-        reqBody.receiverChain.assetType!,
+        reqBody.sourceChain.assetType as LedgerId,
+        reqBody.receiverChain.assetType as LedgerId,
         parseInt(reqBody.amount),
       );
       res.status(200).json(result);

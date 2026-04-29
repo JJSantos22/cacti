@@ -17,9 +17,9 @@ import {
   registerWebServiceEndpoint,
 } from "@hyperledger/cactus-core";
 import {
-  TransactRequestSourceChainAssetTypeEnum,
   TransferRequest,
 } from "../generated/openapi/typescript-axios/api";
+import { LedgerId } from "../types";
 
 export class TransferEndpointV1 implements IWebServiceEndpoint {
   public static readonly CLASS_NAME = "TransferEndpointV1";
@@ -83,33 +83,20 @@ export class TransferEndpointV1 implements IWebServiceEndpoint {
     const reqBody: TransferRequest = req.body;
     this.log.debug("reqBody: ", reqBody);
     try {
-      let result;
-      if (
-        reqBody.sourceChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Besu &&
-        reqBody.receiverChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Fabric
-      ) {
-        result = await this.options.infrastructure
-          .getBesuEnvironment()
-          .transferTokensBesu(
-            reqBody.from,
-            reqBody.to,
-            parseInt(reqBody.amount),
-          );
-      } else if (
-        reqBody.sourceChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Fabric &&
-        reqBody.receiverChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Besu
-      ) {
-        result = await this.options.infrastructure
-          .getFabricEnvironment()
-          .transferTokensFabric(reqBody.from, reqBody.to, reqBody.amount);
-      } else {
-        throw new Error("Invalid chain combination");
+      const sourceLedger = reqBody.sourceChain.assetType as LedgerId;
+      const receiverLedger = reqBody.receiverChain.assetType as LedgerId;
+      if (sourceLedger !== receiverLedger) {
+        throw new Error(
+          "Local transfer requires source and destination ledger to be the same",
+        );
       }
-      res.status(200).json(result);
+      await this.options.infrastructure.transferTokens(
+        sourceLedger,
+        reqBody.from,
+        reqBody.to,
+        parseInt(reqBody.amount),
+      );
+      res.status(200).json({});
     } catch (ex) {
       const errorMsg = `${reqTag} ${fnTag} Failed to transact:`;
       handleRestEndpointException({ errorMsg, log: this.log, error: ex, res });
