@@ -63,9 +63,9 @@ export class CbdcBridgingAppDummyInfrastructure {
 
   private static readonly networkName = "CDBC_Network";
 
-  private static readonly DOCKER_IMAGE_VERSION = "5f190f37f-2025-08-19";
+  private static readonly DOCKER_IMAGE_VERSION = "2026-02-02-1458";
   private static readonly DOCKER_IMAGE_NAME =
-    "kubaya/cacti-satp-hermes-gateway";
+    "tomassilva2187/satp-gateway";
 
   private readonly log: Logger;
   private readonly logLevel: LogLevelDesc;
@@ -121,14 +121,14 @@ export class CbdcBridgingAppDummyInfrastructure {
       dockerNetwork: CbdcBridgingAppDummyInfrastructure.networkName,
       networkId: "BesuLedgerCBDCNetworkA",
       assetId: "BesuCBDCAssetA",
-      assetReferenceId: "SATP-ERC20-BESU-A",
+      assetReferenceId: "SATP-ERC20-BESU",
       label: "BesuEnvironmentA",
     });
     this.besuBEnvironment = new BesuEnvironment(this.logLevel, {
       dockerNetwork: CbdcBridgingAppDummyInfrastructure.networkName,
       networkId: "BesuLedgerCBDCNetworkB",
       assetId: "BesuCBDCAssetB",
-      assetReferenceId: "SATP-ERC20-BESU-B",
+      assetReferenceId: "SATP-ERC20-BESU",
       label: "BesuEnvironmentB",
     });
   }

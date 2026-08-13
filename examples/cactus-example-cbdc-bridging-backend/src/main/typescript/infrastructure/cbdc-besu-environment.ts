@@ -100,8 +100,8 @@ export class BesuEnvironment {
       emitContainerLogs: true,
       envVars: ["BESU_NETWORK=dev"],
       networkName: this.dockerNetwork,
-      containerImageVersion: "2024-06-09-cc2f9c5",
-      containerImageName: "ghcr.io/hyperledger/cactus-besu-all-in-one",
+      containerImageVersion: "v2.2.0-rc.2",
+      containerImageName: "ghcr.io/hyperledger-cacti/besu-all-in-one",
     });
 
     const docker = new Docker();
