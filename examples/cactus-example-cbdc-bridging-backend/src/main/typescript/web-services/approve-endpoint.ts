@@ -82,18 +82,26 @@ export class ApproveEndpointV1 implements IWebServiceEndpoint {
     this.log.debug("reqBody: ", reqBody);
     try {
       let result;
-      if (
-        reqBody.ledger.assetType ===
-        TransactRequestSourceChainAssetTypeEnum.Besu
-      ) {
-        result = await this.options.infrastructure
-          .getBesuEnvironment()
-          .approveNTokensBesu(reqBody.user, parseInt(reqBody.amount));
-      } else {
-        result = await this.options.infrastructure
-          .getFabricEnvironment()
-          .approveNTokensFabric(reqBody.user, reqBody.amount);
+      const assetType = reqBody.ledger?.assetType;
+      if (!assetType) {
+        throw new Error("Missing ledger.assetType in approve request.");
       }
+
+      let besuEnv;
+      if (assetType === TransactRequestSourceChainAssetTypeEnum.BesuA) {
+        besuEnv = this.options.infrastructure.getBesuEnvironmentA();
+      } else if (assetType === TransactRequestSourceChainAssetTypeEnum.BesuB) {
+        besuEnv = this.options.infrastructure.getBesuEnvironmentB();
+      } else {
+        throw new Error(
+          `Unknown ledger.assetType: ${assetType}. Use BESU_A or BESU_B`,
+        );
+      }
+
+      result = await besuEnv.approveNTokensBesu(
+        reqBody.user,
+        parseInt(reqBody.amount),
+      );
       res.status(200).json(result);
     } catch (ex) {
       const errorMsg = `${reqTag} ${fnTag} Failed to transact:`;

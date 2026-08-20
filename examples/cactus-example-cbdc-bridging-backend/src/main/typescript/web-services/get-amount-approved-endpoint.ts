@@ -16,7 +16,7 @@ import {
   handleRestEndpointException,
   registerWebServiceEndpoint,
 } from "@hyperledger/cactus-core";
-import { TransactRequestSourceChainAssetTypeEnum } from "../generated/openapi/typescript-axios/api";
+import { GetAmountApprovedChainEnum } from "../generated/openapi/typescript-axios/api";
 
 export class GetAmountApprovedEndpointV1 implements IWebServiceEndpoint {
   public static readonly CLASS_NAME = "GetAmountApprovedEndpointV1";
@@ -80,14 +80,21 @@ export class GetAmountApprovedEndpointV1 implements IWebServiceEndpoint {
     this.log.debug(reqTag);
     try {
       let result;
-      if (req.query.chain === TransactRequestSourceChainAssetTypeEnum.Besu) {
+      const chain = req.query.chain as GetAmountApprovedChainEnum | undefined;
+      if (!chain) {
+        throw new Error("Missing chain query parameter. Use BESU_A or BESU_B");
+      }
+
+      if (chain === GetAmountApprovedChainEnum.BesuA) {
         result = await this.options.infrastructure
-          .getBesuEnvironment()
+          .getBesuEnvironmentA()
+          .getAmountApprovedBesu(req.query.user as string);
+      } else if (chain === GetAmountApprovedChainEnum.BesuB) {
+        result = await this.options.infrastructure
+          .getBesuEnvironmentB()
           .getAmountApprovedBesu(req.query.user as string);
       } else {
-        result = await this.options.infrastructure
-          .getFabricEnvironment()
-          .getAmountApprovedFabric(req.query.user as string);
+        throw new Error(`Unknown chain: ${chain}. Use BESU_A or BESU_B`);
       }
       res.status(200).json(result);
     } catch (ex) {

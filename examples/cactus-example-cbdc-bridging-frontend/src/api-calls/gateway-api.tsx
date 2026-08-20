@@ -7,6 +7,12 @@ import {
 } from "@hyperledger/cactus-example-cbdc-bridging-backend/src/main/typescript/generated/openapi/typescript-axios/api";
 import { Configuration } from "@hyperledger/cactus-example-cbdc-bridging-backend/src/main/typescript/generated/openapi/typescript-axios/configuration";
 
+type BesuChainId = "BESU_A" | "BESU_B";
+
+function toBesuChainId(ledger: "FABRIC" | "BESU"): BesuChainId {
+  return ledger === "FABRIC" ? "BESU_A" : "BESU_B";
+}
+
 export async function getSessionReferencesBridge(
   path: string,
   type: "BESU" | "FABRIC",
@@ -15,7 +21,9 @@ export async function getSessionReferencesBridge(
     new Configuration({ basePath: path }),
   );
   try {
-    const response = await getSessionReferencesApi.getSessionsReferences(type);
+    const response = await getSessionReferencesApi.getSessionsReferences(
+      toBesuChainId(type) as any,
+    );
 
     if (response.status !== 200) {
       throw Error(response.status + " :" + response.data);
@@ -50,13 +58,13 @@ export async function transactTokens(
       sender,
       receiver,
       sourceChain: {
-        assetType: sourceChain,
+        assetType: toBesuChainId(sourceChain),
       },
       receiverChain: {
-        assetType: receiverChain,
+        assetType: toBesuChainId(receiverChain) as any,
       },
       amount,
-    } as TransactRequest);
+    } as unknown as TransactRequest);
 
     if (response.status !== 200) {
       throw Error(response.status + " :" + response.data);

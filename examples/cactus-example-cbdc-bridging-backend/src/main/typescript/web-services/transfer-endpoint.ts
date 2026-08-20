@@ -17,8 +17,8 @@ import {
   registerWebServiceEndpoint,
 } from "@hyperledger/cactus-core";
 import {
-  TransactRequestSourceChainAssetTypeEnum,
   TransferRequest,
+  TransactRequestSourceChainAssetTypeEnum,
 } from "../generated/openapi/typescript-axios/api";
 
 export class TransferEndpointV1 implements IWebServiceEndpoint {
@@ -84,31 +84,51 @@ export class TransferEndpointV1 implements IWebServiceEndpoint {
     this.log.debug("reqBody: ", reqBody);
     try {
       let result;
-      if (
-        reqBody.sourceChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Besu &&
-        reqBody.receiverChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Fabric
-      ) {
-        result = await this.options.infrastructure
-          .getBesuEnvironment()
-          .transferTokensBesu(
-            reqBody.from,
-            reqBody.to,
-            parseInt(reqBody.amount),
-          );
-      } else if (
-        reqBody.sourceChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Fabric &&
-        reqBody.receiverChain.assetType ===
-          TransactRequestSourceChainAssetTypeEnum.Besu
-      ) {
-        result = await this.options.infrastructure
-          .getFabricEnvironment()
-          .transferTokensFabric(reqBody.from, reqBody.to, reqBody.amount);
-      } else {
-        throw new Error("Invalid chain combination");
+      const sourceAssetType = reqBody.sourceChain?.assetType;
+      const receiverAssetType = reqBody.receiverChain?.assetType;
+
+      if (!sourceAssetType || !receiverAssetType) {
+        throw new Error(
+          "Missing sourceChain.assetType or receiverChain.assetType in transfer request.",
+        );
       }
+
+      let sourceChain: "BESU_A" | "BESU_B";
+      if (sourceAssetType === TransactRequestSourceChainAssetTypeEnum.BesuA) {
+        sourceChain = "BESU_A";
+      } else if (
+        sourceAssetType === TransactRequestSourceChainAssetTypeEnum.BesuB
+      ) {
+        sourceChain = "BESU_B";
+      } else {
+        throw new Error(
+          `Unknown sourceChain.assetType: ${sourceAssetType}. Use BESU_A or BESU_B`,
+        );
+      }
+
+      let destinationChain: "BESU_A" | "BESU_B";
+      if (
+        receiverAssetType === TransactRequestSourceChainAssetTypeEnum.BesuA
+      ) {
+        destinationChain = "BESU_A";
+      } else if (
+        receiverAssetType === TransactRequestSourceChainAssetTypeEnum.BesuB
+      ) {
+        destinationChain = "BESU_B";
+      } else {
+        throw new Error(
+          `Unknown receiverChain.assetType: ${receiverAssetType}. Use BESU_A or BESU_B`,
+        );
+      }
+
+      await this.options.infrastructure.bridgeTokens(
+        reqBody.from,
+        reqBody.to,
+        sourceChain,
+        destinationChain,
+        parseInt(reqBody.amount),
+      );
+      result = { status: "success", message: "Transfer initiated" };
       res.status(200).json(result);
     } catch (ex) {
       const errorMsg = `${reqTag} ${fnTag} Failed to transact:`;

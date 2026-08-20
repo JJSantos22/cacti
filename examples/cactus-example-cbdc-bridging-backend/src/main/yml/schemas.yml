@@ -5,8 +5,8 @@ AssetType:
     assetType:
       type: string
       enum:
-        - FABRIC
-        - BESU
+        - BESU_A
+        - BESU_B
 TransactRequest:
   description: "Request schema for initiating a transaction. Includes details such as the transaction context, mode (data or transfer), payload, and information about the source and receiver DLT networks."
   type: object

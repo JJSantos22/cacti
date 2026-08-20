@@ -8,6 +8,12 @@ import {
 } from "@hyperledger/cactus-example-cbdc-bridging-backend/src/main/typescript/generated/openapi/typescript-axios/api";
 import { Configuration } from "@hyperledger/cactus-example-cbdc-bridging-backend/src/main/typescript/generated/openapi/typescript-axios/configuration";
 
+type BesuChainId = "BESU_A" | "BESU_B";
+
+function toBesuChainId(ledger: "FABRIC" | "BESU"): BesuChainId {
+  return ledger === "FABRIC" ? "BESU_A" : "BESU_B";
+}
+
 export async function approveNTokens(
   path: string,
   ledger: "FABRIC" | "BESU",
@@ -20,9 +26,9 @@ export async function approveNTokens(
       user: frontendUserFrom,
       amount: amount,
       ledger: {
-        assetType: ledger,
+        assetType: toBesuChainId(ledger) as any,
       },
-    });
+    } as any);
 
     if (res.status !== 200) {
       throw Error(res.status + " :" + res.data);
@@ -47,7 +53,7 @@ export async function fetchAmountApprovedToBridge(
   try {
     const response = await getAmountApprovedApi.getAmountApproved(
       frontendUser,
-      ledger,
+      toBesuChainId(ledger) as any,
     );
 
     if (response.status !== 200) {
@@ -66,11 +72,11 @@ export async function transferTokens(
   frontendUserTo: string,
   amount: string,
 ) {
-  let receiverLedger: "FABRIC" | "BESU";
+  let receiverLedger: BesuChainId;
   if (ledger === "FABRIC") {
-    receiverLedger = "BESU";
+    receiverLedger = "BESU_B";
   } else {
-    receiverLedger = "FABRIC";
+    receiverLedger = "BESU_A";
   }
   const transferApi = new TransferApi(new Configuration({ basePath: path }));
   try {
@@ -79,12 +85,12 @@ export async function transferTokens(
       to: frontendUserTo,
       amount: amount,
       sourceChain: {
-        assetType: ledger,
+        assetType: toBesuChainId(ledger) as any,
       },
       receiverChain: {
-        assetType: receiverLedger,
+        assetType: receiverLedger as any,
       },
-    });
+    } as any);
 
     if (res.status !== 200) {
       throw Error(res.status + " :" + res.data);
@@ -105,7 +111,10 @@ export async function getBalance(
     new Configuration({ basePath: path }),
   );
   try {
-    const response = await getBalanceApi.getBalance(frontendUser, ledger);
+    const response = await getBalanceApi.getBalance(
+      frontendUser,
+      toBesuChainId(ledger) as any,
+    );
 
     if (response.status !== 200) {
       throw Error(response.status + " :" + response.data);
@@ -131,9 +140,9 @@ export async function mintTokens(
       user: user,
       amount: amount,
       ledger: {
-        assetType: ledger,
+        assetType: toBesuChainId(ledger) as any,
       },
-    } as MintRequest);
+    } as unknown as MintRequest);
 
     if (response.status !== 200) {
       throw Error(response.status + " :" + response.data);

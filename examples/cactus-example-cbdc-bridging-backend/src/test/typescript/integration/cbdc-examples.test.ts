@@ -14,9 +14,13 @@ import {
   GetAmountApprovedApi,
   GetSessionsReferencesApi,
   TransferApi,
+  GetBalanceChainEnum,
+  GetAmountApprovedChainEnum,
+  GetSessionsReferencesLedgerEnum,
   TransactRequest,
   MintRequest,
   ApproveRequest,
+  TransactRequestSourceChainAssetTypeEnum,
 } from "../../../main/typescript/generated/openapi/typescript-axios/api";
 import { Configuration } from "../../../main/typescript/generated/openapi/typescript-axios/configuration";
 
@@ -27,6 +31,10 @@ const log = LoggerProvider.getOrCreate({
   level: logLevel,
   label: "CBDC-E2E-API-TEST",
 });
+
+const BESU_A = "BESU_A" as const;
+const BESU_B = "BESU_B" as const;
+type BesuChainId = typeof BESU_A | typeof BESU_B;
 
 let app: CbdcBridgingApp;
 let infrastructure: CbdcBridgingAppDummyInfrastructure;
@@ -100,17 +108,17 @@ describe("CBDC E2E API Scenarios", () => {
     try {
       const aliceFabricBalance = await getBalanceApi.getBalance(
         ALICE_USER,
-        "FABRIC",
+        BESU_A,
       );
       const aliceBesuBalance = await getBalanceApi.getBalance(
         ALICE_USER,
-        "BESU",
+        BESU_B,
       );
       const bobFabricBalance = await getBalanceApi.getBalance(
         BOB_USER,
-        "FABRIC",
+        BESU_A,
       );
-      const bobBesuBalance = await getBalanceApi.getBalance(BOB_USER, "BESU");
+      const bobBesuBalance = await getBalanceApi.getBalance(BOB_USER, BESU_B);
 
       log.info(
         `After reset - Alice: Fabric=${aliceFabricBalance.data.amount}, Besu=${aliceBesuBalance.data.amount}`,
@@ -132,11 +140,11 @@ describe("CBDC E2E API Scenarios", () => {
     try {
       const aliceFabricResponse = await getBalanceApi.getBalance(
         ALICE_USER,
-        "FABRIC",
+        BESU_A,
       );
       const aliceBesuResponse = await getBalanceApi.getBalance(
         ALICE_USER,
-        "BESU",
+        BESU_B,
       );
 
       const aliceFabricBalance = parseInt(aliceFabricResponse.data.amount);
@@ -154,8 +162,8 @@ describe("CBDC E2E API Scenarios", () => {
           const transferResponse = await transferApi.transfer({
             from: ALICE_USER,
             to: BOB_USER,
-            sourceChain: { assetType: "FABRIC" },
-            receiverChain: { assetType: "FABRIC" },
+            sourceChain: { assetType: BESU_A },
+            receiverChain: { assetType: BESU_A },
             amount: aliceFabricBalance.toString(),
           });
           log.info(`Transfer API response status: ${transferResponse.status}`);
@@ -184,8 +192,8 @@ describe("CBDC E2E API Scenarios", () => {
           const transferResponse = await transferApi.transfer({
             from: ALICE_USER,
             to: BOB_USER,
-            sourceChain: { assetType: "BESU" },
-            receiverChain: { assetType: "BESU" },
+            sourceChain: { assetType: BESU_B },
+            receiverChain: { assetType: BESU_B },
             amount: aliceBesuBalance.toString(),
           });
           log.info(`Transfer API response status: ${transferResponse.status}`);
@@ -210,11 +218,11 @@ describe("CBDC E2E API Scenarios", () => {
 
         const finalFabricResponse = await getBalanceApi.getBalance(
           ALICE_USER,
-          "FABRIC",
+          BESU_A,
         );
         const finalBesuResponse = await getBalanceApi.getBalance(
           ALICE_USER,
-          "BESU",
+          BESU_B,
         );
 
         const finalFabricBalance = parseInt(finalFabricResponse.data.amount);
@@ -228,27 +236,27 @@ describe("CBDC E2E API Scenarios", () => {
           try {
             if (finalFabricBalance > 0) {
               await infrastructure
-                .getFabricEnvironment()
-                .transferTokensFabric(
+                .getBesuEnvironmentA()
+                .transferTokensBesu(
                   ALICE_USER,
                   BOB_USER,
-                  finalFabricBalance.toString(),
+                  finalFabricBalance,
                 );
             }
             if (finalBesuBalance > 0) {
               await infrastructure
-                .getBesuEnvironment()
+                .getBesuEnvironmentB()
                 .transferTokensBesu(ALICE_USER, BOB_USER, finalBesuBalance);
             }
 
             await new Promise((resolve) => setTimeout(resolve, 3000));
             const fallbackFabricResponse = await getBalanceApi.getBalance(
               ALICE_USER,
-              "FABRIC",
+              BESU_A,
             );
             const fallbackBesuResponse = await getBalanceApi.getBalance(
               ALICE_USER,
-              "BESU",
+              BESU_B,
             );
 
             log.info(
@@ -276,7 +284,7 @@ describe("CBDC E2E API Scenarios", () => {
    */
   async function setupAliceWithCBDC(
     amount: number = ESCROW_AMOUNT,
-    ledger: "FABRIC" | "BESU" = "FABRIC",
+    ledger: typeof BESU_A | typeof BESU_B = BESU_A,
   ) {
     await mintApi.mint({
       user: ALICE_USER,
@@ -298,7 +306,7 @@ describe("CBDC E2E API Scenarios", () => {
   async function createAssetReference(
     user: string,
     amount: number,
-    ledger: "FABRIC" | "BESU" = "BESU",
+    ledger: typeof BESU_A | typeof BESU_B = BESU_B,
   ) {
     await approveApi.approve({
       user: user,
@@ -327,8 +335,8 @@ describe("CBDC E2E API Scenarios", () => {
     locker: string,
     recipient: string,
     amount: number,
-    sourceChain: "FABRIC" | "BESU",
-    receiverChain: "FABRIC" | "BESU",
+    sourceChain: typeof BESU_A | typeof BESU_B,
+    receiverChain: typeof BESU_A | typeof BESU_B,
   ) {
     try {
       const response = await transactApi.transact({
@@ -355,7 +363,7 @@ describe("CBDC E2E API Scenarios", () => {
       const mintRequest: MintRequest = {
         user: ALICE_USER,
         amount: ESCROW_AMOUNT.toString(),
-        ledger: { assetType: "FABRIC" },
+        ledger: { assetType: BESU_A },
       };
 
       const mintResponse = await mintApi.mint(mintRequest);
@@ -363,7 +371,7 @@ describe("CBDC E2E API Scenarios", () => {
 
       const aliceInitialBalanceResponse = await getBalanceApi.getBalance(
         ALICE_USER,
-        "FABRIC",
+        BESU_A,
       );
       expect(aliceInitialBalanceResponse.status).toBe(200);
 
@@ -374,7 +382,7 @@ describe("CBDC E2E API Scenarios", () => {
 
       const bobInitialBalanceResponse = await getBalanceApi.getBalance(
         BOB_USER,
-        "BESU",
+        BESU_B,
       );
       expect(bobInitialBalanceResponse.status).toBe(200);
 
@@ -383,14 +391,14 @@ describe("CBDC E2E API Scenarios", () => {
       const approveRequest: ApproveRequest = {
         user: ALICE_USER,
         amount: ESCROW_AMOUNT.toString(),
-        ledger: { assetType: "FABRIC" },
+        ledger: { assetType: BESU_A },
       };
 
       const approveResponse = await approveApi.approve(approveRequest);
       expect(approveResponse.status).toBe(200);
 
       const approvedAmountResponse =
-        await getAmountApprovedApi.getAmountApproved(ALICE_USER, "FABRIC");
+        await getAmountApprovedApi.getAmountApproved(ALICE_USER, BESU_A);
       expect(approvedAmountResponse.status).toBe(200);
 
       const approvedAmount = parseInt(approvedAmountResponse.data);
@@ -399,8 +407,8 @@ describe("CBDC E2E API Scenarios", () => {
       const transactRequest: TransactRequest = {
         sender: ALICE_USER,
         receiver: BOB_USER,
-        sourceChain: { assetType: "FABRIC" },
-        receiverChain: { assetType: "BESU" },
+        sourceChain: { assetType: BESU_A },
+        receiverChain: { assetType: BESU_B },
         amount: ESCROW_AMOUNT.toString(),
       };
 
@@ -437,9 +445,9 @@ describe("CBDC E2E API Scenarios", () => {
 
         try {
           const fabricSessionsResponse =
-            await getSessionsReferencesApi.getSessionsReferences("FABRIC");
+            await getSessionsReferencesApi.getSessionsReferences(BESU_A);
           const besuSessionsResponse =
-            await getSessionsReferencesApi.getSessionsReferences("BESU");
+            await getSessionsReferencesApi.getSessionsReferences(BESU_B);
           const allSessions = [
             ...fabricSessionsResponse.data,
             ...besuSessionsResponse.data,
@@ -459,7 +467,7 @@ describe("CBDC E2E API Scenarios", () => {
             try {
               const currentAliceBalance = await getBalanceApi.getBalance(
                 ALICE_USER,
-                "FABRIC",
+                BESU_A,
               );
               const currentAliceBalanceValue = parseInt(
                 currentAliceBalance.data.amount,
@@ -486,14 +494,14 @@ describe("CBDC E2E API Scenarios", () => {
 
       const aliceFinalBalanceResponse = await getBalanceApi.getBalance(
         ALICE_USER,
-        "FABRIC",
+        BESU_A,
       );
       expect(aliceFinalBalanceResponse.status).toBe(200);
       const aliceFinalBalance = parseInt(aliceFinalBalanceResponse.data.amount);
 
       const bobFinalBalanceResponse = await getBalanceApi.getBalance(
         BOB_USER,
-        "BESU",
+        BESU_B,
       );
       expect(bobFinalBalanceResponse.status).toBe(200);
       const bobFinalBalance = parseInt(bobFinalBalanceResponse.data.amount);
@@ -510,9 +518,9 @@ describe("CBDC E2E API Scenarios", () => {
       }
 
       const finalFabricSessions =
-        await getSessionsReferencesApi.getSessionsReferences("FABRIC");
+        await getSessionsReferencesApi.getSessionsReferences(BESU_A);
       const finalBesuSessions =
-        await getSessionsReferencesApi.getSessionsReferences("BESU");
+        await getSessionsReferencesApi.getSessionsReferences(BESU_B);
 
       log.info(
         `Final Fabric sessions: ${JSON.stringify(finalFabricSessions.data)}`,
@@ -531,7 +539,7 @@ describe("CBDC E2E API Scenarios", () => {
         const invalidMintRequest: MintRequest = {
           user: ALICE_USER,
           amount: "-100",
-          ledger: { assetType: "FABRIC" },
+          ledger: { assetType: BESU_A },
         };
         const response = await mintApi.mint(invalidMintRequest);
         if (response.status === 200) {
@@ -541,7 +549,7 @@ describe("CBDC E2E API Scenarios", () => {
 
           const balanceResponse = await getBalanceApi.getBalance(
             ALICE_USER,
-            "FABRIC",
+            BESU_A,
           );
           const balance = parseInt(balanceResponse.data.amount);
           expect(balance).toBeGreaterThanOrEqual(0);
@@ -560,17 +568,17 @@ describe("CBDC E2E API Scenarios", () => {
   test(
     "Alice successfully creates an asset reference in the Besu network",
     async () => {
-      await setupAliceWithCBDC(ESCROW_AMOUNT, "BESU");
+      await setupAliceWithCBDC(ESCROW_AMOUNT, BESU_B);
 
       const approvedAmount = await createAssetReference(
         ALICE_USER,
         ESCROW_AMOUNT,
-        "BESU",
+        BESU_B,
       );
       expect(approvedAmount).toBe(ESCROW_AMOUNT);
 
       const finalApprovedResponse =
-        await getAmountApprovedApi.getAmountApproved(ALICE_USER, "BESU");
+        await getAmountApprovedApi.getAmountApproved(ALICE_USER, BESU_B);
       const finalApprovedAmount = parseInt(finalApprovedResponse.data);
       expect(finalApprovedAmount).toBe(ESCROW_AMOUNT);
 
@@ -587,15 +595,15 @@ describe("CBDC E2E API Scenarios", () => {
   test(
     "Bob successfully locks an asset reference in the Besu network",
     async () => {
-      await setupAliceWithCBDC(ESCROW_AMOUNT, "BESU");
-      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, "BESU");
+      await setupAliceWithCBDC(ESCROW_AMOUNT, BESU_B);
+      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, BESU_B);
 
       const lockResult = await lockAssetReference(
         ALICE_USER,
         BOB_USER,
         ESCROW_AMOUNT,
-        "BESU",
-        "FABRIC",
+        BESU_B,
+        BESU_A,
       );
       expect(lockResult.success).toBe(true);
       expect(lockResult.response?.status).toBe(200);
@@ -611,25 +619,25 @@ describe("CBDC E2E API Scenarios", () => {
   test(
     "Bob fails to lock an already locked asset reference",
     async () => {
-      await setupAliceWithCBDC(ESCROW_AMOUNT, "BESU");
-      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, "BESU");
+      await setupAliceWithCBDC(ESCROW_AMOUNT, BESU_B);
+      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, BESU_B);
 
       const bobLockResult = await lockAssetReference(
         ALICE_USER,
         BOB_USER,
         ESCROW_AMOUNT,
-        "BESU",
-        "FABRIC",
+        BESU_B,
+        BESU_A,
       );
       expect(bobLockResult.success).toBe(true);
 
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const aliceBalance = await getBalanceApi.getBalance(ALICE_USER, "BESU");
+      const aliceBalance = await getBalanceApi.getBalance(ALICE_USER, BESU_B);
       const currentBalance = parseInt(aliceBalance.data.amount);
       const approvedAmount = await getAmountApprovedApi.getAmountApproved(
         ALICE_USER,
-        "BESU",
+        BESU_B,
       );
       const currentApproved = parseInt(approvedAmount.data);
 
@@ -645,14 +653,14 @@ describe("CBDC E2E API Scenarios", () => {
   test(
     "Bob successfully deletes an asset reference",
     async () => {
-      await setupAliceWithCBDC(ESCROW_AMOUNT, "BESU");
-      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, "BESU");
+      await setupAliceWithCBDC(ESCROW_AMOUNT, BESU_B);
+      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, BESU_B);
       const lockResult = await lockAssetReference(
         ALICE_USER,
         BOB_USER,
         ESCROW_AMOUNT,
-        "BESU",
-        "FABRIC",
+        BESU_B,
+        BESU_A,
       );
       expect(lockResult.success).toBe(true);
 
@@ -663,11 +671,11 @@ describe("CBDC E2E API Scenarios", () => {
         try {
           const aliceBalance = await getBalanceApi.getBalance(
             ALICE_USER,
-            "BESU",
+            BESU_B,
           );
           const currentBalance = parseInt(aliceBalance.data.amount);
 
-          const bobBalance = await getBalanceApi.getBalance(BOB_USER, "FABRIC");
+          const bobBalance = await getBalanceApi.getBalance(BOB_USER, BESU_A);
           const bobCurrentBalance = parseInt(bobBalance.data.amount);
 
           if (currentBalance === 0 && bobCurrentBalance >= ESCROW_AMOUNT) {
@@ -682,11 +690,11 @@ describe("CBDC E2E API Scenarios", () => {
       }
       const finalAliceBalance = await getBalanceApi.getBalance(
         ALICE_USER,
-        "BESU",
+        BESU_B,
       );
       const finalApproved = await getAmountApprovedApi.getAmountApproved(
         ALICE_USER,
-        "BESU",
+        BESU_B,
       );
       expect(parseInt(finalAliceBalance.data.amount)).toBe(0);
       expect(parseInt(finalApproved.data)).toBe(0);
@@ -701,20 +709,20 @@ describe("CBDC E2E API Scenarios", () => {
   test(
     "Bridge entity deletes asset reference and burns tokens",
     async () => {
-      await setupAliceWithCBDC(ESCROW_AMOUNT, "BESU");
-      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, "BESU");
+      await setupAliceWithCBDC(ESCROW_AMOUNT, BESU_B);
+      await createAssetReference(ALICE_USER, ESCROW_AMOUNT, BESU_B);
       const lockResult = await lockAssetReference(
         ALICE_USER,
         BOB_USER,
         ESCROW_AMOUNT,
-        "BESU",
-        "FABRIC",
+        BESU_B,
+        BESU_A,
       );
       expect(lockResult.success).toBe(true);
 
       const initialBobBesuBalance = await getBalanceApi.getBalance(
         BOB_USER,
-        "BESU",
+        BESU_B,
       );
       let transactionCompleted = false;
       let attempts = 0;
@@ -724,15 +732,15 @@ describe("CBDC E2E API Scenarios", () => {
         try {
           const aliceBalance = await getBalanceApi.getBalance(
             ALICE_USER,
-            "BESU",
+            BESU_B,
           );
           const bobBesuBalance = await getBalanceApi.getBalance(
             BOB_USER,
-            "BESU",
+            BESU_B,
           );
           const bobFabricBalance = await getBalanceApi.getBalance(
             BOB_USER,
-            "FABRIC",
+            BESU_A,
           );
 
           const aliceCurrentBalance = parseInt(aliceBalance.data.amount);
@@ -761,15 +769,15 @@ describe("CBDC E2E API Scenarios", () => {
 
       const finalAliceBalance = await getBalanceApi.getBalance(
         ALICE_USER,
-        "BESU",
+        BESU_B,
       );
       const finalBobBesuBalance = await getBalanceApi.getBalance(
         BOB_USER,
-        "BESU",
+        BESU_B,
       );
       const finalBobFabricBalance = await getBalanceApi.getBalance(
         BOB_USER,
-        "FABRIC",
+        BESU_A,
       );
 
       const aliceFinalBalance = parseInt(finalAliceBalance.data.amount);
@@ -795,9 +803,9 @@ describe("CBDC E2E API Scenarios", () => {
   test(
     "Error scenario: Cannot create asset reference without sufficient balance",
     async () => {
-      await setupAliceWithCBDC(100, "BESU");
+      await setupAliceWithCBDC(100, BESU_B);
       try {
-        await createAssetReference(ALICE_USER, 500, "BESU");
+        await createAssetReference(ALICE_USER, 500, BESU_B);
         fail("Expected approval to fail with insufficient balance");
       } catch (error) {
         log.info(

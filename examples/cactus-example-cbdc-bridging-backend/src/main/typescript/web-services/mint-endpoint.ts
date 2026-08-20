@@ -82,18 +82,26 @@ export class MintEndpointV1 implements IWebServiceEndpoint {
     this.log.debug("reqBody: ", reqBody);
     try {
       let result;
-      if (
-        reqBody.ledger.assetType ===
-        TransactRequestSourceChainAssetTypeEnum.Besu
-      ) {
-        result = await this.options.infrastructure
-          .getBesuEnvironment()
-          .mintTokensBesu(reqBody.user, parseInt(reqBody.amount));
-      } else {
-        result = await this.options.infrastructure
-          .getFabricEnvironment()
-          .mintTokensFabric(reqBody.user, reqBody.amount);
+      const assetType = reqBody.ledger?.assetType;
+      if (!assetType) {
+        throw new Error("Missing ledger.assetType in mint request.");
       }
+
+      let besuEnv;
+      if (assetType === TransactRequestSourceChainAssetTypeEnum.BesuA) {
+        besuEnv = this.options.infrastructure.getBesuEnvironmentA();
+      } else if (assetType === TransactRequestSourceChainAssetTypeEnum.BesuB) {
+        besuEnv = this.options.infrastructure.getBesuEnvironmentB();
+      } else {
+        throw new Error(
+          `Unknown ledger.assetType: ${assetType}. Use BESU_A or BESU_B`,
+        );
+      }
+
+      result = await besuEnv.mintTokensBesu(
+        reqBody.user,
+        parseInt(reqBody.amount),
+      );
       res.status(200).json(result);
     } catch (ex) {
       const errorMsg = `${reqTag} ${fnTag} Failed to transact:`;

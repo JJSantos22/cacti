@@ -68,8 +68,8 @@
                       "assetType": {
                         "type": "string",
                         "enum": [
-                          "FABRIC",
-                          "BESU"
+                          "BESU_A",
+                          "BESU_B"
                         ]
                       }
                     }
@@ -81,8 +81,8 @@
                       "assetType": {
                         "type": "string",
                         "enum": [
-                          "FABRIC",
-                          "BESU"
+                          "BESU_A",
+                          "BESU_B"
                         ]
                       }
                     }
@@ -208,8 +208,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "FABRIC",
-                "BESU"
+                "BESU_A",
+                "BESU_B"
               ]
             },
             "description": "Unique identifier for the session."
@@ -289,8 +289,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "FABRIC",
-                "BESU"
+                "BESU_A",
+                "BESU_B"
               ]
             }
           }
@@ -365,8 +365,8 @@
                       "assetType": {
                         "type": "string",
                         "enum": [
-                          "FABRIC",
-                          "BESU"
+                          "BESU_A",
+                          "BESU_B"
                         ]
                       }
                     }
@@ -482,8 +482,8 @@
                       "assetType": {
                         "type": "string",
                         "enum": [
-                          "FABRIC",
-                          "BESU"
+                          "BESU_A",
+                          "BESU_B"
                         ]
                       }
                     }
@@ -590,8 +590,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "FABRIC",
-                "BESU"
+                "BESU_A",
+                "BESU_B"
               ]
             }
           }
@@ -657,8 +657,8 @@
                       "assetType": {
                         "type": "string",
                         "enum": [
-                          "FABRIC",
-                          "BESU"
+                          "BESU_A",
+                          "BESU_B"
                         ]
                       }
                     }
@@ -670,8 +670,8 @@
                       "assetType": {
                         "type": "string",
                         "enum": [
-                          "FABRIC",
-                          "BESU"
+                          "BESU_A",
+                          "BESU_B"
                         ]
                       }
                     }

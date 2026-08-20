@@ -63,8 +63,8 @@ paths:
           schema:
             type: string
             enum:
-              - FABRIC
-              - BESU
+              - BESU_A
+              - BESU_B
           description: Unique identifier for the session.
       responses:
         '200':
@@ -98,8 +98,8 @@ paths:
               schema:
                 type: string
                 enum:
-                  - FABRIC
-                  - BESU
+                  - BESU_A
+                  - BESU_B
         responses:
           '200':
             description: OK
@@ -198,8 +198,8 @@ paths:
           schema:
             type: string
             enum:
-              - FABRIC
-              - BESU
+              - BESU_A
+              - BESU_B
       responses:
         '200':
           description: OK
